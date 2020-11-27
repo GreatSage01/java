@@ -81,7 +81,7 @@ pipeline{
                     env.deployEnv="${project_branch}"
 
                     //部署k8s认证信息
-                    k8s.KubeConfig_bak([deployEnv: "${deployEnv}",
+                    k8s.kube([deployEnv: "${deployEnv}",
                                                                 Prod_k8sUrl: "${com_values.Prod_k8sUrl}",
                                                                 Prod_k8sCred: "${com_values.Prod_k8sCred}",
                                                                 Dev_k8sUrl: "${com_values.Prod_k8sUrl}",
