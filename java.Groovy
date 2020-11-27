@@ -71,7 +71,7 @@ pipeline{
                     }else {
                         error("ERROR: choice_image Error")
                     }
-                    env.base_image="${registryURL}/${base_image}"
+                    env.base_image="${com_values.HUB_Url}/${base_image}"
                     println "base_image:"+base_image
                     
                     // 镜像标签转小写
