@@ -26,7 +26,7 @@
 
 
 @Library('Jenkins-fuyu') _
-
+def public_mod = new org.devops.public_mod()
 
 
 pipeline{
@@ -95,7 +95,7 @@ pipeline{
                     env.Yml_path="/home/jenkins/deployment/${deployEnv}/${projectName}"
                     
                     //docker镜像,IMAGE_Name
-                    public_mod.Harbor_tag([deployEnv: "${deployEnv}",projectName:"${projectName}"])
+                    //public_mod.Harbor_tag([deployEnv: "${deployEnv}",projectName:"${projectName}"])
 
                     //k8s资源确认
                     //public_mod.K8s_exist([Language:"${env.Language}",serviceName:"${projectName}",nameSpaces:"${nameSpaces}"])
