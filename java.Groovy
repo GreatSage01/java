@@ -89,6 +89,7 @@ pipeline{
                                                         Dev_k8sCred: "${com_values.Prod_k8sCred}"
                                                         ])
                     
+                    echo "${K8s_url}"
 
                     //项目yaml文件保存路径
                     env.Yml_path="/home/jenkins/deployment/${deployEnv}/${projectName}"
