@@ -93,7 +93,7 @@ pipeline{
                     env.Yml_path="/home/jenkins/deployment/${deployEnv}/${projectName}"
                     
                     //docker镜像,IMAGE_Name
-                    public_mod.Harbor_tag([deployEnv: "${deployEnv}",projectName:"${projectName}"],HUB_Url:"${com_values.HUB_Url}")
+                    public_mod.Harbor_tag([deployEnv: "${deployEnv}",projectName:"${projectName}",HUB_Url:"${com_values.HUB_Url}"])
 
                     //k8s资源确认
                     //public_mod.K8s_exist([Language:"${env.Language}",serviceName:"${projectName}",nameSpaces:"${nameSpaces}"])
