@@ -81,7 +81,7 @@ pipeline{
                     env.deployEnv="${project_branch}"
 
                     //部署k8s认证信息
-                    (K8s_url,K8s_credentials)=k8s.kube([deployEnv: "${deployEnv}",
+                    (K8s_url,K8s_credentials)=k8s.KubeConfig([deployEnv: "${deployEnv}",
                                                         Prod_k8sUrl: "${com_values.Prod_k8sUrl}",
                                                         Prod_k8sCred: "${com_values.Prod_k8sCred}",
                                                         Dev_k8sUrl: "${com_values.Prod_k8sUrl}",
@@ -93,7 +93,7 @@ pipeline{
                     env.Yml_path="/home/jenkins/deployment/${deployEnv}/${projectName}"
                     
                     //docker镜像,IMAGE_Name
-                    (Tag_latest,Tag_reversion,IMAGE_Name)=public_mod.Harbor_bak([deployEnv: "${deployEnv}",projectName:"${projectName}",HUB_Url: "${com_values.HUB_Url}"])
+                    public_mod.Harbor_tag([deployEnv: "${deployEnv}",projectName:"${projectName}"],HUB_Url:"${com_values.HUB_Url}")
 
                     //k8s资源确认
                     //public_mod.K8s_exist([Language:"${env.Language}",serviceName:"${projectName}",nameSpaces:"${nameSpaces}"])
@@ -142,7 +142,7 @@ pipeline{
         println "k8s_url:"+K8s_url
         println "k8s_credentials:"+K8s_credentials
         println "Tag_latest:" + Tag_latest
-        println "Tag_reversion:" +Tag_reversion
+        println "Tag_reversion:" + Tag_reversion
 
         
       }
