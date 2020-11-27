@@ -97,7 +97,7 @@ pipeline{
                     public_mod.Harbor_tag([deployEnv: "${deployEnv}",projectName:"${projectName}",HUB_Url:"${com_values.HUB_Url}"])
 
                     //k8s资源确认
-                    public_mod.K8s_exist([Language:"${env.Language}",serviceName:"${projectName}",nameSpaces:"${nameSpaces}",k8s_url: K8s_url ,K8s_credentials: K8s_credentials])
+                    public_mod.K8s_exist([Language:"${env.Language}",serviceName:"${projectName}",nameSpaces:"${deployEnv}",k8s_url: K8s_url ,K8s_credentials: K8s_credentials])
 
                     //左侧展示
                     //public_mod.Wrap([user_name: "${user_name}",projectName:"${projectName}",reversion:"${tag_reversion}",deployEnv:"${deployEnv}"])
