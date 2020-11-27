@@ -142,7 +142,7 @@ pipeline{
         println "k8s_url:"+K8s_url
         println "k8s_credentials:"+K8s_credentials
         println "Tag_latest:" + Tag_latest
-        println "Tag_reversion:" Tag_reversion
+        println "Tag_reversion:" +Tag_reversion
 
         
       }
