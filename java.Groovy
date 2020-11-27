@@ -54,15 +54,16 @@ pipeline{
         stage("配置读取"){
             steps{
                 script{
-                    valuesYaml = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/com_values.yaml")
-                    println valuesYaml.getClass()
+                    com_values = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/com_values.yaml")
+                    proj_values = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/project_values.yaml")
                 }
             }
         }
     stage('Deploy') {
       steps {
-        echo valuesYaml.Prod_k8sUrl
-        
+        echo com_values.Prod_k8sUrl
+        println  com_values.Svn_Url
+        println proj_values.Approver
       }
     }
   }
