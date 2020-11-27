@@ -11,5 +11,5 @@ Gitlab_Url: http://git.fjfuyu.net/server-side
 Gitlab_Cred: git_admin
 
 #SVN
-Svn_Url: http://fy-svn.fjfuyu.net/svn
-Svn_Cred: 3c96b6f7-78de-41c9-a2df-ea0ccf97de5b
+SVN_Url: http://fy-svn.fjfuyu.net/svn
+SVN_Cred: 3c96b6f7-78de-41c9-a2df-ea0ccf97de5b

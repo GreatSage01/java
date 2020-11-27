@@ -55,15 +55,83 @@ pipeline{
             steps{
                 script{
                     com_values = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/com_values.yaml")
-                    proj_values = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/values.yaml")
+                    proj_values = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/project_values.yaml")
                 }
             }
         }
-    stage('Deploy') {
+
+        stage("初始化")
+            steps{
+                script{
+                    //定义基础镜像
+                    if ( "${choice_image}" == "alpine3" ){
+                        base_image="${oracle_image}"
+                    }else if ( "${choice_image}" == "centos7"){
+                        base_image="${yushi_image}"
+                    }else {
+                        error("ERROR: choice_image Error")
+                    }
+                    env.base_image="${registryURL}/${base_image}"
+                    println "base_image:"+base_image
+                    
+                    // 镜像标签转小写
+                    env.projectName="${project_name}".toLowerCase()
+                    
+                    //发布环境
+                    env.deployEnv="${project_branch}"
+
+                    //部署k8s认证信息
+                    k8s.KubeConfig("${deployEnv}")
+                    
+                    //项目yaml文件保存路径
+                    env.Yml_path="/home/jenkins/deployment/${deployEnv}/${projectName}"
+                    
+                    //docker镜像,IMAGE_Name
+                    public_mod.Harbor_tag([deployEnv: "${deployEnv}",projectName:"${projectName}"])
+
+                    //k8s资源确认
+                    public_mod.K8s_exist([Language:"${env.Language}",serviceName:"${projectName}",nameSpaces:"${nameSpaces}"])
+
+                    //左侧展示
+                    public_mod.Wrap([user_name: "${user_name}",projectName:"${projectName}",reversion:"${tag_reversion}",deployEnv:"${deployEnv}"])
+
+
+                }
+            }
+
+    stage('检出SVN'){
+        when{
+            expression { "${project_switch}" == 'deploy' }
+        }
+        steps{
+            script{
+                // 拼接SVN链接地址
+                //Svn_Url: http://fy-svn.fjfuyu.net/svn
+                if ( "${Deploy_env}" == "master" ) {
+                    env.subversionURL = "${com_values.SVN_Url}/Deploy/prod/${project_name}"
+                }else if ( "${Deploy_env}" == "dev" ) {
+                    env.subversionURL = "${com_values.SVN_Url}/Deploy/test/${project_name}"
+                }
+                else{
+                    error("${Deploy_env}分支错误！")
+                }
+
+                // 检出SVN上的源代码
+                git.gitcheckout([projectName:"${env.projectName}",
+                                Deploy_env:"${env.Deploy_env}",
+                                SVN_Cred:"${com_values.SVN_Cred}",
+                                SVN_Url:"${env.subversionURL}"])
+            }
+
+        }
+    }
+
+    stage('echo') {
       steps {
         echo com_values.Prod_k8sUrl
-        println  com_values.Svn_Url
+        println  com_values.SVN_Url
         println proj_values.Approver
+        println "projectName"+projectName
       }
     }
   }
