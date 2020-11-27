@@ -86,7 +86,7 @@ pipeline{
                                                                 Prod_k8sCred: "${com_values.Prod_k8sCred}",
                                                                 Dev_k8sUrl: "${com_values.Prod_k8sUrl}",
                                                                 Dev_k8sCred: "${com_values.Prod_k8sCred}"
-                                                                )
+                                                                ])
                     
                     println k8s_url
                     println k8s_credentials
