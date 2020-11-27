@@ -60,7 +60,7 @@ pipeline{
             }
         }
 
-        stage("初始化")
+        stage("初始化"){
             steps{
                 script{
                     //定义基础镜像
@@ -98,6 +98,7 @@ pipeline{
 
                 }
             }
+        }
 
     stage('检出SVN'){
         when{
