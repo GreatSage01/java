@@ -55,7 +55,7 @@ pipeline{
             steps{
                 script{
                     com_values = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/com_values.yaml")
-                    proj_values = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/project_values.yaml")
+                    proj_values = com.loadValuesYaml("${env.WORKSPACE}/jenkinsfile/Values/values.yaml")
                 }
             }
         }
