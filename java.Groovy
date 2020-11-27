@@ -25,7 +25,7 @@
 //])
 
 
-@Library('Jenkins-fuyu-dev@dev') 
+@Library('Jenkins-fuyu-dev') _
 def public_mod = new org.devops.public_mod()
 
 
