@@ -157,7 +157,7 @@ pipeline{
                     sh '''/bin/bash
                         #Dockerfile
                         Dockerfile(){
-                            cat > "${WORKSPACE}/${Deploy_env}/${projectName}"/Dockerfile <<EOF
+                            cat > "${WORKSPACE}/${deployEnv}/${projectName}"/Dockerfile <<EOF
 # Base image
 FROM ${base_image}
 
@@ -165,7 +165,7 @@ FROM ${base_image}
 MAINTAINER java
 LABEL operator=xueerqin
 LABEL app=${env.projectName}
-LABEL env=${env.Deploy_env}
+LABEL env=${env.deployEnv}
 
 # SET WORKDIR
 WORKDIR /opt
@@ -189,13 +189,13 @@ EOF
                 '''
     
                 //java配置文件读取
-                config_Path="${env.WORKSPACE}/${Deploy_env}/${projectName}/values/${Deploy_env}-values.json"
+                config_Path="${env.WORKSPACE}/${deployEnv}/${projectName}/values/${deployEnv}-values.json"
                 Config_values=java.ReadConfig("${config_Path}")
     
                 //构建
                 sh '''#!/bin/bash -xe
                     rm -rf /home/jenkins/.m2/repository/com/yiyu
-                    mvn -D maven.test.skip=true -B -U -f "${WORKSPACE}/${Deploy_env}/${projectName}"/pom.xml clean install
+                    mvn -D maven.test.skip=true -B -U -f "${WORKSPACE}/${deployEnv}/${projectName}"/pom.xml clean install
                     echo "Build App Done !"
                 '''
                 }
@@ -242,11 +242,11 @@ EOF
                         //deployment
                         sh '''#!/bin/bash
                             if [ "${env.svc_exist}" == "${projectName}"  ];then
-                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${deployEnv} ${IMAGE_Name}
                                 kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
                                 #kubectl set image deployment/${projectName} ${projectName}="${IMAGE_Name}" -n ${nameSpaces} --record
                             else
-                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${deployEnv} ${IMAGE_Name}
                                 kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
                             fi
                         '''
