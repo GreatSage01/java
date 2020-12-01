@@ -154,10 +154,10 @@ pipeline{
             steps{
 
                 //生成项目Dockerfile
-                sh '''#!/bin/bash
-                    #Dockerfile
-                    generateDockerfile() {
-                        cat > "${WORKSPACE}/${deployEnv}/${projectName}"/Dockerfile <<EOF
+                sh '''/bin/bash
+# generate Dockerfile
+generateDockerfile(){
+cat > "${WORKSPACE}/${deployEnv}/${projectName}"/Dockerfile <<EOF
 # Base image
 FROM ${base_image}
 
@@ -170,7 +170,7 @@ LABEL env=${env.deployEnv}
 # SET WORKDIR
 WORKDIR /opt
 
-# CREATE LOG DIRECTORY
+# CREATE DIRECTORY
 RUN mkdir -p logs/sdklog
 
 # ADD
@@ -179,11 +179,10 @@ ADD target/${project_name}.jar "\\${WORKDIR}"
 EXPOSE 80
 
 ENTRYPOINT ["java", "-server", "-Xms512m", "-Xmx2048m", "-javaagent:/opt/agent/agent/skywalking-agent.jar", "-Dskywalking.agent.service_name=${deployEnv}-${projectName}", "-Dskywalking.collector.backend_service=skywalking7-skywalking-oap.skywalking:11800", "-jar", "/opt/${project_name}.jar", "--server.port=80"]
-
 EOF
-                }
+}
 
-                generateDockerfile
+generateDockerfile
 
                 echo "java Dcoekrfile 制作成功！"
             '''
