@@ -118,46 +118,46 @@ pipeline{
             }
         }
 
-    stage('检出SVN'){
-        when{
-            expression { "${project_switch}" == 'deploy' }
-        }
-        steps{
-            script{
-                // 拼接SVN链接地址
-                if ( "${env.project_branch}" == "master" ) {
-                    env.subversionURL = "${com_values.SVN_Url}/Deploy/prod/${project_name}"
-                }else if ( "${env.project_branch}" == "dev" ) {
-                    env.subversionURL = "${com_values.SVN_Url}/Deploy/test/${project_name}"
-                }else if ( "${env.project_branch}" == "feiteng-master" ){
-                    env.subversionURL = "${com_values.SVN_Url}/Deploy/feiteng-prod/${project_name}"
-                }else if ( "${env.project_branch}" == "feiteng-dev" ){
-                    env.subversionURL = "${com_values.SVN_Url}/Deploy/feiteng-test/${project_name}"
+        stage('检出SVN'){
+            when{
+                expression { "${project_switch}" == 'deploy' }
+            }
+            steps{
+                script{
+                    // 拼接SVN链接地址
+                    if ( "${env.project_branch}" == "master" ) {
+                        env.subversionURL = "${com_values.SVN_Url}/Deploy/prod/${project_name}"
+                    }else if ( "${env.project_branch}" == "dev" ) {
+                        env.subversionURL = "${com_values.SVN_Url}/Deploy/test/${project_name}"
+                    }else if ( "${env.project_branch}" == "feiteng-master" ){
+                        env.subversionURL = "${com_values.SVN_Url}/Deploy/feiteng-prod/${project_name}"
+                    }else if ( "${env.project_branch}" == "feiteng-dev" ){
+                        env.subversionURL = "${com_values.SVN_Url}/Deploy/feiteng-test/${project_name}"
+                    }
+                    else{
+                        error("${project_branch}分支错误！")
+                    }
+    
+                    // 检出SVN上的源代码
+                    svn.svncheckout([projectName:"${env.projectName}",
+                                    Deploy_env:"${env.Deploy_env}",
+                                    SVN_Cred:"${com_values.SVN_Cred}",
+                                    SVN_Url:"${env.subversionURL}"])
                 }
-                else{
-                    error("${project_branch}分支错误！")
-                }
-
-                // 检出SVN上的源代码
-                svn.svncheckout([projectName:"${env.projectName}",
-                                Deploy_env:"${env.Deploy_env}",
-                                SVN_Cred:"${com_values.SVN_Cred}",
-                                SVN_Url:"${env.subversionURL}"])
             }
         }
-    }
-
-    stage('构建'){
-        when{
-            expression { "${project_switch}" == 'deploy' }
-        }
-        steps{
-            script{
-                //生成项目Dockerfile
-                sh '''/bin/bash
-                    #Dockerfile
-                    Dockerfile(){
-                        cat > "${WORKSPACE}/${Deploy_env}/${projectName}"/Dockerfile <<EOF
+    
+        stage('构建'){
+            when{
+                expression { "${project_switch}" == 'deploy' }
+            }
+            steps{
+                script{
+                    //生成项目Dockerfile
+                    sh '''/bin/bash
+                        #Dockerfile
+                        Dockerfile(){
+                            cat > "${WORKSPACE}/${Deploy_env}/${projectName}"/Dockerfile <<EOF
 # Base image
 FROM ${base_image}
 
@@ -181,115 +181,115 @@ EXPOSE 80
 ENTRYPOINT ["java", "-server", "-Xms512m", "-Xmx2048m", "-javaagent:/opt/agent/agent/skywalking-agent.jar", "-Dskywalking.agent.service_name=${Deploy_env}-${projectName}", "-Dskywalking.collector.backend_service=skywalking7-skywalking-oap.skywalking:11800", "-jar", "/opt/${project_name}.jar", "--server.port=80"]
 
 EOF
-                    }
+                }
 
                     Dockerfile
 
                     echo "java Dcoekrfile 制作成功！"
-            '''
-
-            //java配置文件读取
-            config_Path="${env.WORKSPACE}/${Deploy_env}/${projectName}/values/${Deploy_env}-values.json"
-            Config_values=java.ReadConfig("${config_Path}")
-
-            //构建
-            sh '''#!/bin/bash -xe
-                rm -rf /home/jenkins/.m2/repository/com/yiyu
-                mvn -D maven.test.skip=true -B -U -f "${WORKSPACE}/${Deploy_env}/${projectName}"/pom.xml clean install
-                echo "Build App Done !"
-            '''
-        }
-    }
-
-    stage('Docker Image'){
-        when{
-            environment name: 'project_switch',value: 'deploy'
-        }
-        steps{
-            script{
-                if( env.deployEnv == 'master' || env.deployEnv == 'feiteng-master' ){
-                    timeout(time: 30, unit: 'MINUTES') {
-                        input message:'deploy to master?', submitter: "${proj_values.approver}"
-                        echo "master docker image build"
-                    }
-                }else if( env.deployEnv == 'dev' || env.deployEnv == 'feiteng-dev' ){
-                        echo "dev docker image build"
+                '''
+    
+                //java配置文件读取
+                config_Path="${env.WORKSPACE}/${Deploy_env}/${projectName}/values/${Deploy_env}-values.json"
+                Config_values=java.ReadConfig("${config_Path}")
+    
+                //构建
+                sh '''#!/bin/bash -xe
+                    rm -rf /home/jenkins/.m2/repository/com/yiyu
+                    mvn -D maven.test.skip=true -B -U -f "${WORKSPACE}/${Deploy_env}/${projectName}"/pom.xml clean install
+                    echo "Build App Done !"
+                '''
                 }
-                java.BuildImage([projectName:"${projectName}",
-                                deployEnv:"${deployEnv}",
-                                IMAGE_Name:"${IMAGE_Name}",
-                                HUB_Url:"${com_values.HUB_Url}",
-                                HUB_Cred:"${com_values.HUB_Cred}"])
-
-        }
-    }
-
-    stage('部署K8s'){
-        when{
-            environment name: 'project_switch',value: 'deploy'
-        }
-        steps{
-            script{
-                withKubeConfig(credentialsId: "${K8s_credentials}", serverUrl: "${K8s_url}"){
-                    //ComfigMap
-                    java.BuildConfigMap([projectName: "${projectName}",
-                                         deployEnv: "${deployEnv}",
-                                         configmap_exist: "${env.configmap_exist}"
-                                        ])
-
-                    //deployment
-                    sh '''#!/bin/bash
-                        if [ "${env.svc_exist}" == "${projectName}"  ];then
-                            sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
-                            kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
-                            #kubectl set image deployment/${projectName} ${projectName}="${IMAGE_Name}" -n ${nameSpaces} --record
-                        else
-                            sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
-                            kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
-                        fi
-                    '''
-
-                    //ingress
-                    if ( "${env.ingress_exist}" != "${env.projectName}-tls" ) {
-                        sh '''#!/bin/bash
-                            sh ${WORKSPACE}/jenkinsfile/shell/deploy-ingress-kong.sh ${projectName} ${nameSpaces} ${DOMAIN_NAME} ${Yml_path} ${is_plugins}
-                            kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}-ingress-kong.yaml --record
-                            echo "${projectName} ingress 发布成功！"
-                        '''
-                    }
-                    
-                    if ( env.deployEnv == 'master' && "${env.ingress_exist}" != "${env.projectName}-tls" ){
-                            com.Create_consul([deployEnv: "${deployEnv}",
-                                                Yml_path: "${Yml_path}",
-                                                domainName: "${domainName}",
-                                                serviceName: "${projectName}",
-                                                healthCheck: "/${projectName}/health",
-                                                Language: "${Language}"
-                                            ])
-                    }
-                }
-                
-                println  deployEnv+"."+projectName="部署到k8s成功！"
-
             }
         }
+    
+        stage('Docker Image'){
+            when{
+                environment name: 'project_switch',value: 'deploy'
+            }
+            steps{
+                script{
+                    if( env.deployEnv == 'master' || env.deployEnv == 'feiteng-master' ){
+                        timeout(time: 30, unit: 'MINUTES') {
+                            input message:'deploy to master?', submitter: "${proj_values.approver}"
+                            echo "master docker image build"
+                        }
+                    }else if( env.deployEnv == 'dev' || env.deployEnv == 'feiteng-dev' ){
+                            echo "dev docker image build"
+                    }
+                    java.BuildImage([projectName:"${projectName}",
+                                    deployEnv:"${deployEnv}",
+                                    IMAGE_Name:"${IMAGE_Name}",
+                                    HUB_Url:"${com_values.HUB_Url}",
+                                    HUB_Cred:"${com_values.HUB_Cred}"])
+    
+                }
+            }
+        }
+    
+        stage('部署K8s'){
+            when{
+                environment name: 'project_switch',value: 'deploy'
+            }
+            steps{
+                script{
+                    withKubeConfig(credentialsId: "${K8s_credentials}", serverUrl: "${K8s_url}"){
+                        //ComfigMap
+                        java.BuildConfigMap([projectName: "${projectName}",
+                                             deployEnv: "${deployEnv}",
+                                             configmap_exist: "${env.configmap_exist}"
+                                            ])
+    
+                        //deployment
+                        sh '''#!/bin/bash
+                            if [ "${env.svc_exist}" == "${projectName}"  ];then
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
+                                kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
+                                #kubectl set image deployment/${projectName} ${projectName}="${IMAGE_Name}" -n ${nameSpaces} --record
+                            else
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
+                                kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
+                            fi
+                        '''
+    
+                        //ingress
+                        if ( "${env.ingress_exist}" != "${env.projectName}-tls" ) {
+                            sh '''#!/bin/bash
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy-ingress-kong.sh ${projectName} ${nameSpaces} ${DOMAIN_NAME} ${Yml_path} ${is_plugins}
+                                kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}-ingress-kong.yaml --record
+                                echo "${projectName} ingress 发布成功！"
+                            '''
+                        }
+                        
+                        if ( env.deployEnv == 'master' && "${env.ingress_exist}" != "${env.projectName}-tls" ){
+                                com.Create_consul([deployEnv: "${deployEnv}",
+                                                    Yml_path: "${Yml_path}",
+                                                    domainName: "${domainName}",
+                                                    serviceName: "${projectName}",
+                                                    healthCheck: "/${projectName}/health",
+                                                    Language: "${Language}"
+                                                ])
+                        }
+                    }
+                    
+                    println  deployEnv+"."+projectName="部署到k8s成功！"
+    
+                }
+            }
+        }
+    
+    
+
+        stage('echo') {
+            steps {
+                echo com_values.Prod_k8sUrl
+                println  com_values.SVN_Url
+                println proj_values.Approver
+                println "projectName"+projectName
+                println "k8s_url:"+K8s_url
+                println "k8s_credentials:"+K8s_credentials
+                println "Tag_latest:" + Tag_latest
+                println "Tag_reversion:" + Tag_reversion
+            }
+        }   
     }
-
-
-
-    stage('echo') {
-      steps {
-        echo com_values.Prod_k8sUrl
-        println  com_values.SVN_Url
-        println proj_values.Approver
-        println "projectName"+projectName
-        println "k8s_url:"+K8s_url
-        println "k8s_credentials:"+K8s_credentials
-        println "Tag_latest:" + Tag_latest
-        println "Tag_reversion:" + Tag_reversion
-
-        
-      }
-    }
-  }
 }
