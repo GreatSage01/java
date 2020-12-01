@@ -241,7 +241,7 @@ echo "Generate Dockerfile Done !"
                                             ])
     
                         //deployment
-                        sh '''#!/bin/bash
+                        sh '''#!/bin/bash -xe
                             if [ "${svc_exist}" == "${projectName}"  ];then
                                 sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${deployEnv} ${Yml_path} ${deployEnv} ${IMAGE_Name}
                                 kubectl apply -f ${Yml_path}/${projectName}-${deployEnv}.yaml  --record
@@ -254,7 +254,7 @@ echo "Generate Dockerfile Done !"
     
                         //ingress
                         if ( "${ingress_exist}" != "${env.projectName}-tls" ) {
-                            sh '''#!/bin/bash
+                            sh '''#!/bin/bash -xe
                                 sh ${WORKSPACE}/jenkinsfile/shell/deploy-ingress-kong.sh ${projectName} ${deployEnv} ${DOMAIN_NAME} ${Yml_path} ${is_plugins}
                                 kubectl apply -f ${Yml_path}/${projectName}-${deployEnv}-ingress-kong.yaml --record
                                 echo "${projectName} ingress 发布成功！"
