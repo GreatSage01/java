@@ -31,7 +31,7 @@ fi
 cd ${Yml_path}
 
 if [ n${is_plugins} == n"1" ];then
-cat >${project_name}-${nameSpaces}-ingress-kong.yaml<<EOF
+cat >${projectName}-${nameSpaces}-ingress-kong.yaml<<EOF
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -62,7 +62,7 @@ spec:
           servicePort: 80
 EOF
 else
-cat >${project_name}-${nameSpaces}-ingress-kong.yaml<<EOF
+cat >${projectName}-${nameSpaces}-ingress-kong.yaml<<EOF
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
