@@ -234,6 +234,7 @@ echo "Generate Dockerfile Done !"
             steps{
                 script{
                     withKubeConfig(credentialsId: "${K8s_credentials}", serverUrl: "${K8s_url}"){
+                        withEnv(["podNum=${proj_values.podNum}"]){
                         //ComfigMap
                         java.BuildConfigMap([projectName: "${projectName}",
                                              deployEnv: "${deployEnv}",
@@ -243,11 +244,11 @@ echo "Generate Dockerfile Done !"
                         //deployment
                         sh '''#!/bin/bash -xe
                             if [ "${svc_exist}" == "${projectName}"  ];then
-                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${proj_values.podNum} ${deployEnv} ${Yml_path} ${deployEnv} ${IMAGE_Name}
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${deployEnv} ${Yml_path} ${deployEnv} ${IMAGE_Name}
                                 kubectl apply -f ${Yml_path}/${projectName}-${deployEnv}.yaml  --record
                                 #kubectl set image deployment/${projectName} ${projectName}="${IMAGE_Name}" -n ${deployEnv} --record
                             else
-                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${proj_values.podNum} ${deployEnv} ${Yml_path} ${deployEnv} ${IMAGE_Name}
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${deployEnv} ${Yml_path} ${deployEnv} ${IMAGE_Name}
                                 kubectl apply -f ${Yml_path}/${projectName}-${deployEnv}.yaml  --record
                             fi
                         '''
@@ -271,9 +272,11 @@ echo "Generate Dockerfile Done !"
                                                 ])
                         }
                     }
+
                     
                     println  deployEnv+"."+projectName+"部署到k8s成功！"
     
+                }
                 }
             }
         }
