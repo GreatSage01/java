@@ -13,6 +13,15 @@ sub_domain=$3
 Yml_path=$4
 is_plugins=$5
 
+if [ ! $# == 5 ]; then
+
+echo "Usage: $0 projectName  nameSpaces sub_domain Yml_path is_plugins"
+
+exit
+
+fi
+
+
 if [ n${nameSpaces} == n"master" -o n${nameSpaces} == n"feiteng-master" ];then
 host=${sub_domain}
 else

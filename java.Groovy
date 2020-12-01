@@ -80,7 +80,10 @@ pipeline{
 
                     //domainName
                     env.domainName="${sub_domain}"
-                    
+
+                    //
+                    is_plugins=0
+
                     //发布环境
                     env.deployEnv="${project_branch}"
 
@@ -254,9 +257,9 @@ echo "Generate Dockerfile Done !"
                         '''
     
                         //ingress
-                        if ( "${ingress_exist}" != "${env.projectName}-tls" ) {
+                        if ( "${ingress_exist}" != "${projectName}-tls" ) {
                             sh '''#!/bin/bash -xe
-                                sh ${WORKSPACE}/jenkinsfile/shell/deploy-ingress-kong.sh ${projectName} ${deployEnv} ${DOMAIN_NAME} ${Yml_path} ${is_plugins}
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy-ingress-kong.sh ${projectName} ${deployEnv} ${sub_domain} ${Yml_path} ${is_plugins}
                                 kubectl apply -f ${Yml_path}/${projectName}-${deployEnv}-ingress-kong.yaml --record
                                 echo "${projectName} ingress 发布成功！"
                             '''

@@ -7,6 +7,14 @@ Yml_path=$4
 environment=$5
 IMAGE_Name=$6
 
+if [ ! $# == 6 ]; then
+
+echo "Usage: $0 projectName  podNum nameSpaces Yml_path environment IMAGE_Name"
+
+exit
+
+fi
+
 mkdir -p ${Yml_path}
 
 cd ${Yml_path}
