@@ -184,7 +184,7 @@ EOF
 
 generateDockerfile
 
-                echo "java Dcoekrfile 制作成功！"
+echo "Generate Dockerfile Done !"
             '''
     
             script{
