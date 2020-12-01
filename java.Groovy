@@ -154,9 +154,9 @@ pipeline{
             steps{
                 script{
                     //生成项目Dockerfile
-                    sh '''/bin/bash
+                    sh '''#!/bin/bash
                         #Dockerfile
-                        Dockerfile(){
+                        generateDockerfile() {
                             cat > "${WORKSPACE}/${deployEnv}/${projectName}"/Dockerfile <<EOF
 # Base image
 FROM ${base_image}
@@ -183,7 +183,7 @@ ENTRYPOINT ["java", "-server", "-Xms512m", "-Xmx2048m", "-javaagent:/opt/agent/a
 EOF
                 }
 
-                    Dockerfile
+                    generateDockerfile
 
                     echo "java Dcoekrfile 制作成功！"
                 '''
