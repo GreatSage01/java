@@ -262,7 +262,7 @@ EOF
                             com.Create_consul([deployEnv: "${deployEnv}",
                                                 Yml_path: "${Yml_path}",
                                                 domainName: "${domainName}",
-                                                serviceName: "${projectName}"
+                                                serviceName: "${projectName}",
                                                 healthCheck: "/${projectName}/health",
                                                 Language: "${Language}"
                                             ])
