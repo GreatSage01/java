@@ -152,12 +152,12 @@ pipeline{
                 expression { "${project_switch}" == 'deploy' }
             }
             steps{
-                script{
-                    //生成项目Dockerfile
-                    sh '''#!/bin/bash
-                        #Dockerfile
-                        generateDockerfile() {
-                            cat > "${WORKSPACE}/${deployEnv}/${projectName}"/Dockerfile <<EOF
+
+                //生成项目Dockerfile
+                sh '''#!/bin/bash
+                    #Dockerfile
+                    generateDockerfile() {
+                        cat > "${WORKSPACE}/${deployEnv}/${projectName}"/Dockerfile <<EOF
 # Base image
 FROM ${base_image}
 
@@ -183,11 +183,13 @@ ENTRYPOINT ["java", "-server", "-Xms512m", "-Xmx2048m", "-javaagent:/opt/agent/a
 EOF
                 }
 
-                    generateDockerfile
+                generateDockerfile
 
-                    echo "java Dcoekrfile 制作成功！"
-                '''
+                echo "java Dcoekrfile 制作成功！"
+            '''
     
+            script{
+                
                 //java配置文件读取
                 config_Path="${env.WORKSPACE}/${deployEnv}/${projectName}/values/${deployEnv}-values.json"
                 Config_values=java.ReadConfig("${config_Path}")
