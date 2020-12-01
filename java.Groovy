@@ -271,7 +271,7 @@ EOF
                         }
                     }
                     
-                    println  deployEnv+"."+projectName="部署到k8s成功！"
+                    println  deployEnv+"."+projectName+"部署到k8s成功！"
     
                 }
             }
