@@ -81,8 +81,8 @@ pipeline{
                     //domainName
                     env.domainName="${sub_domain}"
 
-                    //
-                    is_plugins=0
+                    //is_plugins
+                    env.is_plugins=0
 
                     //发布环境
                     env.deployEnv="${project_branch}"
