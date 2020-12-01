@@ -242,7 +242,7 @@ echo "Generate Dockerfile Done !"
     
                         //deployment
                         sh '''#!/bin/bash
-                            if [ "${env.svc_exist}" == "${projectName}"  ];then
+                            if [ "${svc_exist}" == "${projectName}"  ];then
                                 sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${deployEnv} ${IMAGE_Name}
                                 kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
                                 #kubectl set image deployment/${projectName} ${projectName}="${IMAGE_Name}" -n ${nameSpaces} --record
