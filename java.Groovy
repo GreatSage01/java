@@ -178,7 +178,7 @@ ADD target/${project_name}.jar "\\${WORKDIR}"
 
 EXPOSE 80
 
-ENTRYPOINT ["java", "-server", "-Xms512m", "-Xmx2048m", "-javaagent:/opt/agent/agent/skywalking-agent.jar", "-Dskywalking.agent.service_name=${Deploy_env}-${projectName}", "-Dskywalking.collector.backend_service=skywalking7-skywalking-oap.skywalking:11800", "-jar", "/opt/${project_name}.jar", "--server.port=80"]
+ENTRYPOINT ["java", "-server", "-Xms512m", "-Xmx2048m", "-javaagent:/opt/agent/agent/skywalking-agent.jar", "-Dskywalking.agent.service_name=${deployEnv}-${projectName}", "-Dskywalking.collector.backend_service=skywalking7-skywalking-oap.skywalking:11800", "-jar", "/opt/${project_name}.jar", "--server.port=80"]
 
 EOF
                 }
@@ -189,7 +189,7 @@ EOF
             '''
     
             script{
-                
+
                 //java配置文件读取
                 config_Path="${env.WORKSPACE}/${deployEnv}/${projectName}/values/${deployEnv}-values.json"
                 Config_values=java.ReadConfig("${config_Path}")
