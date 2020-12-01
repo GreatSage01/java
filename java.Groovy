@@ -77,6 +77,9 @@ pipeline{
                     
                     // 镜像标签转小写
                     env.projectName="${project_name}".toLowerCase()
+
+                    //domainName
+                    env.domainName="${sub_domain}"
                     
                     //发布环境
                     env.deployEnv="${project_branch}"
@@ -237,20 +240,35 @@ EOF
                     //deployment
                     sh '''#!/bin/bash
                         if [ "${env.svc_exist}" == "${projectName}"  ];then
-                            sh ${WORKSPACE}/jenkinsfile/java/deploy-java.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
+                            sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
                             kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
                             #kubectl set image deployment/${projectName} ${projectName}="${IMAGE_Name}" -n ${nameSpaces} --record
                         else
+                            sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${Deploy_env} ${IMAGE_Name}
                             kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
                         fi
                     '''
 
                     //ingress
-                    if ( ${env.ingress_exist}" == "${env.projectName}-tls" ){
-                        
+                    if ( "${env.ingress_exist}" != "${env.projectName}-tls" ) {
+                        sh '''#!/bin/bash
+                            sh ${WORKSPACE}/jenkinsfile/shell/deploy-ingress-kong.sh ${projectName} ${nameSpaces} ${DOMAIN_NAME} ${Yml_path} ${is_plugins}
+                            kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}-ingress-kong.yaml --record
+                            echo "${projectName} ingress 发布成功！"
+                        '''
+                    }
+                    
+                    if ( env.deployEnv == 'master' && "${env.ingress_exist}" != "${env.projectName}-tls" ){
+                            com.Create_consul([deployEnv: "${deployEnv}",
+                                                Yml_path: "${Yml_path}",
+                                                domainName: "${domainName}",
+                                                serviceName: "${projectName}"
+                                                healthCheck: "/${projectName}/health",
+                                                Language: "${Language}"
+                                            ])
                     }
                 }
-
+                
                 println  deployEnv+"."+projectName="部署到k8s成功！"
 
             }
