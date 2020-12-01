@@ -164,8 +164,8 @@ FROM ${base_image}
 # MAINTAINER
 MAINTAINER java
 LABEL operator=xueerqin
-LABEL app=${env.projectName}
-LABEL env=${env.deployEnv}
+LABEL app=${projectName}
+LABEL env=${deployEnv}
 
 # SET WORKDIR
 WORKDIR /opt
