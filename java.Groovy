@@ -140,7 +140,7 @@ pipeline{
     
                     // 检出SVN上的源代码
                     svn.svncheckout([projectName:"${env.projectName}",
-                                    Deploy_env:"${env.Deploy_env}",
+                                    Deploy_env:"${env.deployEnv}",
                                     SVN_Cred:"${com_values.SVN_Cred}",
                                     SVN_Url:"${env.subversionURL}"])
                 }
