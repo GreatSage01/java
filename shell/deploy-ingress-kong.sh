@@ -16,7 +16,7 @@ is_plugins=$5
 ws_port=$6
 ws_domainName="websocket.xueerqin.net"
 
-if [ ! $# == 5 ]; then
+if [ ! $# == 6 ]; then
   echo "Usage: $0 projectName nameSpaces domainName Yml_path is_plugins ws_port"
   exit
 fi
