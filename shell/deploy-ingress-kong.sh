@@ -53,7 +53,6 @@ echo "Ingress SSL证书泛域名： ${SSL_secret}"
 
 cd ${Yml_path}
 
-
 cat >${projectName}-${nameSpaces}-ingress-kong.yaml<<EOF
 apiVersion: extensions/v1beta1
 kind: Ingress

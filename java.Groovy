@@ -244,6 +244,7 @@ echo "Generate Dockerfile Done !"
             steps{
                 script{
                     withKubeConfig(credentialsId: "${K8s_credentials}", serverUrl: "${K8s_url}"){
+                        withEnv(["podNum=${proj_values.podNum}"]){
                         //ComfigMap
                         java.BuildConfigMap([projectName: "${projectName}",
                                              deployEnv: "${deployEnv}",
@@ -281,9 +282,11 @@ echo "Generate Dockerfile Done !"
                             }
                         }
                     }
+
                     
                     println  deployEnv+"."+projectName+"部署到k8s成功！"
     
+                }
                 }
             }
         }
