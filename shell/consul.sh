@@ -21,7 +21,7 @@ cat>${json_file}<<EOF
 {
 "id": "${serviceName}",
 "name": "${Language}",
-"address": "https://${domainName}.xueerqin.net${healthCheck}",
+"address": "https://${domainName}${healthCheck}",
 "port": 80,
 "meta":{
         "Group": "${Language}",
@@ -29,7 +29,7 @@ cat>${json_file}<<EOF
 },
 "tags": ["${deployEnv}"],
 "checks": [
-{"http": "https://${domainName}.xueerqin.net${healthCheck}",
+{"http": "https://${domainName}${healthCheck}",
 "interval": "60s"}]
 }
 EOF

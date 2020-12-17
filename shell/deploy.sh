@@ -1,23 +1,31 @@
-#!/bin/bash
+#!/bin/bash -x
 
 projectName=$1
 podNum=$2
 nameSpaces=$3
 Yml_path=$4
-environment=$5
+deployEnv=$5
 IMAGE_Name=$6
+ws_port=$7
+
+
+if [ ! $# == 7 ]; then
+  echo "Usage: $0 projectName podNum nameSpaces Yml_path deployEnv IMAGE_Name ws_port"
+  exit
+fi
+
 
 mkdir -p ${Yml_path}
 
 cd ${Yml_path}
 
-cat >${projectName}-${nameSpaces}.yaml<<EOF
+cat >${projectName}-${deployEnv}.yaml<<EOF
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${projectName}
-  namespace: ${nameSpaces}
+  namespace: ${deployEnv}
 spec:
   replicas: ${podNum}
   strategy:
@@ -106,12 +114,27 @@ metadata:
   labels:
       app: ${projectName}
   name: ${projectName}
-  namespace: ${nameSpaces}
+  namespace: ${deployEnv}
 spec:
   ports:
   - port: 80
     targetPort: 80
     name: web
+EOF
+if [ ${ws_port} != 0 ]
+then
+  j=0
+  for i in ${ws_port[@]}
+  do 
+    echo >>${projectName}-${deployEnv}.yaml <<EOF
+  - port: ${i}
+    targetPort: ${i}
+    name: ws-${j}
+EOF
+    j+=1
+  done
+fi 
+echo >>${projectName}-${deployEnv}.yaml <<EOF
   selector:
     app: ${projectName}
 EOF

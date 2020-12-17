@@ -47,6 +47,9 @@ pipeline{
 
         //技术栈
         Language='java'
+
+        //k8s集群部署地方
+        k8s_ENV="huaweiyun"
     }
 
 
@@ -78,14 +81,13 @@ pipeline{
                     // 镜像标签转小写
                     env.projectName="${project_name}".toLowerCase()
 
-                    //domainName
-                    env.domainName="${sub_domain}"
+
                     
                     //发布环境
                     env.deployEnv="${project_branch}"
 
                     //部署k8s认证信息
-                    (K8s_url,K8s_credentials)=k8s.KubeConfig([deployEnv: "${deployEnv}",
+                    (K8s_url,K8s_credentials)=k8s.KubeConfig([k8s_ENV: "${k8s_ENV}",
                                                         Prod_k8sUrl: "${com_values.Prod_k8sUrl}",
                                                         Prod_k8sCred: "${com_values.Prod_k8sCred}",
                                                         Dev_k8sUrl: "${com_values.Prod_k8sUrl}",
@@ -96,9 +98,9 @@ pipeline{
                     env.Yml_path="/home/jenkins/deployment/${deployEnv}/${projectName}"
                     
                     //docker镜像,IMAGE_Name
-                    public_mod.Harbor_tag([deployEnv: "${deployEnv}",
-                                           projectName:"${projectName}",
-                                           HUB_Url:"${com_values.HUB_Url}"])
+                    (IMAGE_Name,tag_reversion)=public_mod.Harbor_tag([deployEnv: "${deployEnv}",
+                                                    projectName:"${projectName}",
+                                                    HUB_Url:"${com_values.HUB_Url}"])
 
                     //k8s资源确认
                     public_mod.K8s_exist([Language:"${env.Language}",
@@ -162,7 +164,7 @@ cat > "${WORKSPACE}/${deployEnv}/${projectName}"/Dockerfile <<EOF
 FROM ${base_image}
 
 # MAINTAINER
-MAINTAINER java
+MAINTAINER ${Language}
 LABEL operator=xueerqin
 LABEL app=${projectName}
 LABEL env=${deployEnv}
@@ -190,9 +192,17 @@ echo "Generate Dockerfile Done !"
             script{
 
                 //java配置文件读取
-                config_Path="${env.WORKSPACE}/${deployEnv}/${projectName}/values/${deployEnv}-values.json"
+                config_Path="${env.WORKSPACE}/${deployEnv}/${projectName}/values/${deployEnv}-values.yaml"
                 Config_values=java.ReadConfig("${config_Path}")
-    
+                
+                env.ws_port= Config_values.ws_port? "("+Config_values.ws_port.trim()+")" : 0
+
+                env.nameSpaces= Config_values.nameSpaces? Config_values.nameSpaces.trim() : "${deployEnv}"
+
+                env.domainName= Config_values.domainName? Config_values.domainName.trim() : "${sub_domain}.xueerqin.net"
+
+                env.is_plugins= Config_values.is_plugins? Config_values.is_plugins.trim() : 0
+
                 //构建
                 sh '''#!/bin/bash -xe
                     rm -rf /home/jenkins/.m2/repository/com/yiyu
@@ -211,7 +221,7 @@ echo "Generate Dockerfile Done !"
                 script{
                     if( env.deployEnv == 'master' || env.deployEnv == 'feiteng-master' ){
                         timeout(time: 30, unit: 'MINUTES') {
-                            input message:'deploy to master?', submitter: "${proj_values.approver}"
+                            input message:'deploy to master?', submitter: "${proj_values.Approver}"
                             echo "master docker image build"
                         }
                     }else if( env.deployEnv == 'dev' || env.deployEnv == 'feiteng-dev' ){
@@ -243,11 +253,11 @@ echo "Generate Dockerfile Done !"
                         //deployment
                         sh '''#!/bin/bash
                             if [ "${env.svc_exist}" == "${projectName}"  ];then
-                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${deployEnv} ${IMAGE_Name}
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${deployEnv} ${IMAGE_Name} ${ws_port}
                                 kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
                                 #kubectl set image deployment/${projectName} ${projectName}="${IMAGE_Name}" -n ${nameSpaces} --record
                             else
-                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${deployEnv} ${IMAGE_Name}
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy.sh ${projectName} ${podNum} ${nameSpaces} ${Yml_path} ${deployEnv} ${IMAGE_Name} ${ws_port}
                                 kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}.yaml  --record
                             fi
                         '''
@@ -255,13 +265,12 @@ echo "Generate Dockerfile Done !"
                         //ingress
                         if ( "${env.ingress_exist}" != "${env.projectName}-tls" ) {
                             sh '''#!/bin/bash
-                                sh ${WORKSPACE}/jenkinsfile/shell/deploy-ingress-kong.sh ${projectName} ${nameSpaces} ${DOMAIN_NAME} ${Yml_path} ${is_plugins}
+                                sh ${WORKSPACE}/jenkinsfile/shell/deploy-ingress-kong.sh ${projectName} ${nameSpaces} ${domainName} ${Yml_path} ${is_plugins} ${ws_port}
                                 kubectl apply -f ${Yml_path}/${projectName}-${nameSpaces}-ingress-kong.yaml --record
                                 echo "${projectName} ingress 发布成功！"
                             '''
-                        }
                         
-                        if ( env.deployEnv == 'master' && "${env.ingress_exist}" != "${env.projectName}-tls" ){
+                            if ( env.deployEnv == 'master' ){
                                 com.Create_consul([deployEnv: "${deployEnv}",
                                                     Yml_path: "${Yml_path}",
                                                     domainName: "${domainName}",
@@ -269,6 +278,7 @@ echo "Generate Dockerfile Done !"
                                                     healthCheck: "/${projectName}/health",
                                                     Language: "${Language}"
                                                 ])
+                            }
                         }
                     }
                     
