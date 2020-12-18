@@ -219,9 +219,7 @@ pipeline{
                     //        echo "dev docker image build"
                     //}
                     dir(path: "${env.WORKSPACE}/${project_name}" ){
-                        java.BuildImage([projectName:"${projectName}",
-                                    deployEnv:"${deployEnv}",
-                                    IMAGE_Name:"${IMAGE_Name}",
+                        java.BuildImage([IMAGE_Name:"${IMAGE_Name}",
                                     HUB_Url:"${com_values.HUB_Url}",
                                     HUB_Cred:"${com_values.HUB_Cred}"])
                     }
