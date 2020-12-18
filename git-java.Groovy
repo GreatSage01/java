@@ -182,7 +182,7 @@ pipeline{
                 script{
                     dir(path: "${env.WORKSPACE}/${project_name}/"){
                         //生成Dockerfile
-                        java.Build_dockerfile([base_image: "${image_base}",
+                        java.Build_dockerfile([image_base: "${image_base}",
                                                 projectName: "${projectName}",                          
                                                 deployEnv: "${deployEnv}"
                                                 ])
