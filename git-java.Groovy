@@ -29,6 +29,7 @@
 @Library('Jenkins-fuyu@dev')
 def public_mod = new org.devops.public_mod()
 def svn = new org.devops.svn()
+def git = new org.devops.git()
 
 pipeline{
     agent{
