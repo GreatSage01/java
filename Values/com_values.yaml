@@ -7,7 +7,7 @@ HUB_Url: hub.xueerqin.net
 HUB_Cred: hub_admin
 
 #Gitlab
-Gitlab_Url: http://git.fjfuyu.net/server-side
+Gitlab_Url: http://git.fjfuyu.net/java
 Gitlab_Cred: git_admin
 
 #SVN

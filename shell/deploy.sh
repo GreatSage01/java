@@ -1,6 +1,6 @@
-#!/bin/bash -x
+#!/bin/bash -e
 
-projectName=$1
+serviceName=$1
 podNum=$2
 nameSpaces=$3
 Yml_path=$4
@@ -10,7 +10,7 @@ ws_port=$7
 
 
 if [ ! $# == 7 ]; then
-  echo "Usage: $0 projectName podNum nameSpaces Yml_path deployEnv IMAGE_Name ws_port"
+  echo "Usage: $0 serviceName podNum nameSpaces Yml_path deployEnv IMAGE_Name ws_port"
   exit
 fi
 
@@ -19,13 +19,13 @@ mkdir -p ${Yml_path}
 
 cd ${Yml_path}
 
-cat >${projectName}-${deployEnv}.yaml<<EOF
+cat >${serviceName}-${deployEnv}.yaml<<EOF
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${projectName}
-  namespace: ${deployEnv}
+  name: ${serviceName}
+  namespace: ${nameSpaces}
 spec:
   replicas: ${podNum}
   strategy:
@@ -35,11 +35,11 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: ${projectName}
+      app: ${serviceName}
   template:
     metadata:
       labels:
-        app: ${projectName}
+        app: ${serviceName}
     spec:
       affinity:
         nodeAffinity:
@@ -50,13 +50,13 @@ spec:
               - key: environment
                 operator: In
                 values:
-                - ${environment}
+                - ${deployEnv}
       imagePullSecrets:
       - name: hubsecret
       volumes:
-      - name: ${projectName}-config
+      - name: ${serviceName}-config
         configMap:
-          name: ${projectName}-config
+          name: ${serviceName}-config
       - name: skw-agent-volume
         emptyDir: {}
       initContainers:
@@ -67,7 +67,7 @@ spec:
             - mountPath: /tmp
               name: skw-agent-volume
       containers:
-      - name: ${projectName}
+      - name: ${serviceName}
         image: ${IMAGE_Name}
         imagePullPolicy: Always
         env:
@@ -81,7 +81,7 @@ spec:
             cpu: 50m
             memory: 50Mi
         volumeMounts:
-        - name: ${projectName}-config
+        - name: ${serviceName}-config
           mountPath: /opt/config
           readOnly: true
         - name: skw-agent-volume
@@ -92,7 +92,7 @@ spec:
           protocol: TCP
         readinessProbe:
           httpGet:
-            path: /${projectName}/health
+            path: /${serviceName}/health
             port: 80
             scheme: HTTP
           initialDelaySeconds: 30
@@ -100,7 +100,7 @@ spec:
           timeoutSeconds: 5
         livenessProbe:
           httpGet:
-            path: /${projectName}/health
+            path: /${serviceName}/health
             port: 80
             scheme: HTTP
           initialDelaySeconds: 30
@@ -112,21 +112,21 @@ kind: Service
 apiVersion: v1
 metadata:
   labels:
-      app: ${projectName}
-  name: ${projectName}
-  namespace: ${deployEnv}
+      app: ${serviceName}
+  name: ${serviceName}
+  namespace: ${nameSpaces}
 spec:
   ports:
   - port: 80
     targetPort: 80
     name: web
 EOF
-if [ ${ws_port} != 0 ]
+if [[ ${ws_port} != 0 ]]
 then
   j=0
   for i in ${ws_port[@]}
   do 
-    echo >>${projectName}-${deployEnv}.yaml <<EOF
+    echo >>${serviceName}-${deployEnv}.yaml <<EOF
   - port: ${i}
     targetPort: ${i}
     name: ws-${j}
@@ -134,7 +134,7 @@ EOF
     j+=1
   done
 fi 
-echo >>${projectName}-${deployEnv}.yaml <<EOF
+echo >>${serviceName}-${deployEnv}.yaml <<EOF
   selector:
-    app: ${projectName}
+    app: ${serviceName}
 EOF

@@ -1,6 +1,7 @@
 #!/bin/bash
-#projectName 小写项目名
+#serviceName 小写项目名
 #nameSpaces 命名空间
+#deployEnv 发布的环境dev、uat、prod
 #domainName 完整的域名
 #Yml_path yaml文件保存路径
 #is_plugins是否鉴权，0为假不需要，1为真需要，目前只有app-auth这个鉴权插件
@@ -8,16 +9,17 @@
 
 set -x
 
-projectName=$1
+serviceName=$1
 nameSpaces=$2
-domainName=$3
-Yml_path=$4
-is_plugins=$5
-ws_port=$6
+deployEnv=$3
+domainName=$4
+Yml_path=$5
+is_plugins=$6
+ws_port=$7
 ws_domainName="websocket.xueerqin.net"
 
-if [ ! $# == 6 ]; then
-  echo "Usage: $0 projectName nameSpaces domainName Yml_path is_plugins ws_port"
+if [ ! $# == 7 ]; then
+  echo "Usage: $0 serviceName nameSpaces deployEnv domainName Yml_path is_plugins ws_port"
   exit
 fi
 
@@ -30,15 +32,20 @@ then
 fi
 
 #域名
-if [[ "$(echo $nameSpaces|grep "dev")" != "" ]]
+if [[ "$(echo $deployEnv|grep "dev")" != "" ]]
 then
   domainName="t-${domainName}"
   ws_domainName="t-${ws_domainName}"
-elif [[ "$(echo $nameSpaces|grep "master")" != "" ]]
+elif [[ "$(echo $deployEnv|grep "uat")" != "" ]]
 then
-  domainName=${domainName}
-  ws_domainName=${ws_domainName}
-else
+  domainName="u-${domainName}"
+  ws_domainName="u-${ws_domainName}"
+elif [[ "$(echo $deployEnv|grep "pord")" != "" ]]
+then
+  domainName="${domainName}"
+  ws_domainName="${ws_domainName}"
+
+elif  
   echo "命名空间错误：${nameSpaces} "
   exit 1
 fi
@@ -53,28 +60,28 @@ echo "Ingress SSL证书泛域名： ${SSL_secret}"
 
 cd ${Yml_path}
 
-cat >${projectName}-${nameSpaces}-ingress-kong.yaml<<EOF
+cat >${serviceName}-${deployEnv}-ingress-kong.yaml<<EOF
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: ${projectName}-tls
+  name: ${serviceName}-tls
   namespace: ${nameSpaces}
   annotations:
 EOF
 
 if [[ "${is_plugins}" == "1" ]];then
-cat >>${projectName}-${nameSpaces}-ingress-kong.yaml<<EOF
+cat >>${serviceName}-${deployEnv}-ingress-kong.yaml<<EOF
     konghq.com/plugins: app-auth
 EOF
 fi
 
 if [[ "${is_plugins}" == "1" ]];then
-cat >>${projectName}-${nameSpaces}-ingress-kong.yaml<<EOF
+cat >>${serviceName}-${deployEnv}-ingress-kong.yaml<<EOF
     cert-manager.io/cluster-issuer: letsencrypt-fjfuyu
 EOF
 fi
 
-cat >>${projectName}-${nameSpaces}-ingress-kong.yaml<<EOF
+cat >>${serviceName}-${deployEnv}-ingress-kong.yaml<<EOF
     konghq.com/override: https-only
     kubernetes.io/ingress.class: "kong"
 spec:
@@ -86,9 +93,9 @@ spec:
   - host: ${domainName}
     http:
       paths:
-      - path: /${projectName}/
+      - path: /${serviceName}/
         backend:
-          serviceName: ${projectName}
+          serviceName: ${serviceName}
           servicePort: 80
 EOF
 
@@ -97,14 +104,14 @@ then
   j=0
   for i in ${ws_port[@]}
   do
-    echo >>${projectName}-${deployEnv}.yaml <<EOF
+    echo >>${serviceName}-${deployEnv}.yaml <<EOF
   - host: ${ws_domainName}
     http:
       paths:
       - backend:
-          serviceName: ${projectName}-${j}
+          serviceName: ${serviceName}-${j}
           servicePort: ${i}
-        path: /${projectName}/
+        path: /${serviceName}/
 EOF
   done 
 fi 

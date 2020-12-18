@@ -29,9 +29,9 @@ spec:
     - mountPath: "/usr/bin/kubectl"
       name: "volume-2"
       readOnly: false
-    - mountPath: "/home/jenkins/.m2/repository"
-      name: "volume-maven"
-      readOnly: false
+    #- mountPath: "/home/jenkins/.m2/repository"
+    #  name: "volume-maven"
+    #  readOnly: false
     workingDir: "/home/jenkins/agent"
   securityContext:
     runAsUser: 0
@@ -51,9 +51,9 @@ spec:
   - hostPath:
       path: "/usr/local/bin/kubectl"
     name: "volume-2"
-  - hostPath:
-      path: "/data/jenkins-slave/maven"
-    name: "volume-maven"
+#  - hostPath:
+#      path: "/data/jenkins-slave/maven"
+#    name: "volume-maven"
   - emptyDir:
       medium: ""
     name: "workspace-volume"
