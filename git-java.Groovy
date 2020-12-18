@@ -21,6 +21,7 @@
 //        choice(choices: ['dev', 'uat','prod'], description: '发布环境：<br>dev---------测试环境<br>uat-----预发布环境<br>prod------正式环境', name: 'deployEnv'),
 //        choice(choices: ['hub.xueerqin.net/base/oracle-jdk1.8-alpine3.10:0.0.3', 'hub.xueerqin.net/base/oracle-jdk1.8-yushilib-centos7:0.0.6'], description: '选择基础镜像（注：宇视、培训平台请选择centos7镜像、其他默认使用alpine3镜像）', name: 'base_image'),
 //        choice(choices: ['api', 'room', 'cloudcourse', 'busi'], description: '子域名', name: 'sub_domain')
+//          string(defaultValue: '', description: '接收gitlab webhook触发用户（注：无需填写）', name: 'user_name', trim: true)
 //    ])
 //])
 
@@ -122,7 +123,7 @@ pipeline{
                                                         ])
                     //根据发布环境确认k8s部署命名空间
                     nameSpaces=com.get_NS([deployEnv: "${deployEnv}",Language:"${Language}"])
-                    println "-------->发布环境："+deployEnv+'k8s部署空间:'+nameSpaces+'<------------'
+                    println "-------->发布环境："+deployEnv+', k8s部署空间:'+nameSpaces+' <------------'
 
                     //项目yaml文件保存路径
                     env.Yml_path="/home/jenkins/deployment/${deployEnv}/${projectName}"
@@ -217,11 +218,13 @@ pipeline{
                     //}else if( env.deployEnv == 'dev' || env.deployEnv == 'feiteng-dev' ){
                     //        echo "dev docker image build"
                     //}
-                    java.BuildImage([projectName:"${projectName}",
+                    dir(path: "${env.WORKSPACE}/${project_name}" ){
+                        java.BuildImage([projectName:"${projectName}",
                                     deployEnv:"${deployEnv}",
                                     IMAGE_Name:"${IMAGE_Name}",
                                     HUB_Url:"${com_values.HUB_Url}",
                                     HUB_Cred:"${com_values.HUB_Cred}"])
+                    }
                 }
             }
         }
