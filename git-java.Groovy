@@ -187,7 +187,7 @@ pipeline{
             }
             steps{
                 script{
-                    dir(path: "${env.WORKSPACE}/${project_name}"){
+                    dir(path: "${env.WORKSPACE}/${project_name}/"){
                         //生成Dockerfile
                         java.Build_dockerfile([base_image: "${base_image}",
                                                 projectName: "${projectName}",                          
