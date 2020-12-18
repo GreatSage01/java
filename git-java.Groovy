@@ -100,7 +100,7 @@ pipeline{
             steps{
                 script{
                     //定义基础镜像
-                    
+                    def base_images
                     if ( "${choice_image}" == "alpine3" ){
                        def base_images="${oracle_image}"
                     }else if ( "${choice_image}" == "centos7"){
