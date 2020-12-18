@@ -100,8 +100,8 @@ pipeline{
             steps{
                 script{
                     //定义基础镜像
-                    def base_image=com_values.HUB_Url+'/base/oracle-jdk1.8-alpine3.10:0.0.4'
-                    println "base_image:"+base_image
+                    def image_base=com_values.HUB_Url+'/base/oracle-jdk1.8-alpine3.10:0.0.4'
+                    println "base_image:"+image_base
                     
 
                     // 镜像标签转小写
