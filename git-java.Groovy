@@ -100,14 +100,15 @@ pipeline{
             steps{
                 script{
                     //定义基础镜像
+                    
                     if ( "${choice_image}" == "alpine3" ){
-                       def base_image="${oracle_image}"
+                       def base_images="${oracle_image}"
                     }else if ( "${choice_image}" == "centos7"){
-                       def base_image="${yushi_image}"
+                       def base_images="${yushi_image}"
                     }else {
                         error("ERROR: choice_image Error")
                     }
-                    env.base_image=com_values.HUB_Url+'/'+base_image
+                    env.base_image=com_values.HUB_Url+'/'+base_images
                     println "base_image:"+base_image
                     
 
