@@ -101,9 +101,9 @@ pipeline{
                 script{
                     //定义基础镜像
                     if ( "${choice_image}" == "alpine3" ){
-                        base_image="${oracle_image}"
+                       def base_image="${oracle_image}"
                     }else if ( "${choice_image}" == "centos7"){
-                        base_image="${yushi_image}"
+                       def base_image="${yushi_image}"
                     }else {
                         error("ERROR: choice_image Error")
                     }
