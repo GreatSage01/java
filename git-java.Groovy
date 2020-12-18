@@ -101,7 +101,7 @@ pipeline{
                 script{
                     //定义基础镜像
                     def image_base=com_values.HUB_Url+'/base/oracle-jdk1.8-alpine3.10:0.0.4'
-                    println "base_image:"+image_base
+                    println "image_base:"+image_base
                     
 
                     // 镜像标签转小写
@@ -182,7 +182,7 @@ pipeline{
                 script{
                     dir(path: "${env.WORKSPACE}/${project_name}/"){
                         //生成Dockerfile
-                        java.Build_dockerfile([base_image: "${base_image}",
+                        java.Build_dockerfile([base_image: "${image_base}",
                                                 projectName: "${projectName}",                          
                                                 deployEnv: "${deployEnv}"
                                                 ])
