@@ -244,7 +244,7 @@ pipeline{
                             submitterParameter: 'APPROVER_name'
                         )
                         //正式线镜像从uat环境获取
-                        def uat_tag=sh(script: "curl http://172.16.0.94:9991/v1/harbor_tag?repo_name=${Language}-uat/${dict.projectName}", returnStdout: true)
+                        def uat_tag=sh(script: "curl http://172.16.0.94:9991/v1/harbor_tag?repo_name=${Language}-uat/${projectName}", returnStdout: true)
                         env.IMAGE_Name="${com_values.HUB_Url}/${Language}-${deployEnv}/${projectName}:${uat_tag}".trim()
                         println '--------->pord环境本次更新的镜像是：'+IMAGE_Name+'<-----------------'
                     }
