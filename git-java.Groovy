@@ -183,7 +183,7 @@ pipeline{
             when{
                 allOf{
                     environment name: 'project_switch',value: 'deploy';
-                    not {expression  { "${deployEnv}" == 'pord' }
+                    not {expression  { "${deployEnv}" == 'pord' }}
 
                 }
             }
@@ -207,7 +207,7 @@ pipeline{
             when{
                 allOf{
                     environment name: 'project_switch',value: 'deploy';
-                    not {expression  { "${deployEnv}" == 'pord' }
+                    not {expression  { "${deployEnv}" == 'pord' }}
 
                 }
             }
