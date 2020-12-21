@@ -125,9 +125,9 @@ pipeline{
                     //java部署参数
                     java.build_values("${env.WORKSPACE}/${project_name}/deploy-config/${deployEnv}-values.yaml")
                     
-                    println 'ws_port:'+ ws_port
+                    println '------>WebSocket端口列表:'+ ws_port+'<--------'
                     //docker镜像,IMAGE_Name
-                    (IMAGE_Name,tag_reversion)=public_mod.Harbor_tag([deployEnv: "${deployEnv}",
+                    (IMAGE_Name,tag_reversion)=public_mod.Harbor_tag([nameSpaces: "${nameSpaces}",
                                                     projectName:"${projectName}",
                                                     HUB_Url:"${com_values.HUB_Url}"])
 
