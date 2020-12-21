@@ -183,7 +183,7 @@ pipeline{
             when{
                 allOf{
                     expression { "${project_switch}" == 'deploy' };
-                    expression  { "${env.deployEnv}" != 'pord' }
+                    not {expression  { "${env.deployEnv}" == 'prod' }}
 
                 }
             }
@@ -206,8 +206,8 @@ pipeline{
         stage('Docker Image'){
             when{
                 allOf{
-                    environment name: 'project_switch',value: 'deploy';
-                    not {expression  { "${deployEnv}" == 'pord' }}
+                    expression { "${project_switch}" == 'deploy' };
+                    not {expression  { "${env.deployEnv}" == 'prod' }}
 
                 }
             }
