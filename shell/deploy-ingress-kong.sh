@@ -45,7 +45,7 @@ then
   domainName="${domainName}"
   ws_domainName="${ws_domainName}"
 
-elif  
+else
   echo "命名空间错误：${nameSpaces} "
   exit 1
 fi
