@@ -246,6 +246,8 @@ pipeline{
                         //正式线镜像从uat环境获取
                         uat_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "${deployEnv}"])
                         prod_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "${deployEnv}"])
+                        println '--->uat docker tag 是：'+uat_tag+'<----------------'
+                        println '--->prod docker tag 是：'+prod_tag+'<----------------'
                         int  temp_tag=Integer.parseInt(prod_tag)
                         def tag_latest=temp_tag + 1
                         def uat_Image="${com_values.HUB_Url}/${Language}-uat/${projectName}:${uat_tag}".trim()
