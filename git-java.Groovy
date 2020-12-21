@@ -125,10 +125,13 @@ pipeline{
                     //java部署参数
                     java.build_values("${env.WORKSPACE}/${project_name}/deploy-config/${deployEnv}-values.yaml")
                     
+                    println 'ws_port:'+ ws_port
                     //docker镜像,IMAGE_Name
                     (IMAGE_Name,tag_reversion)=public_mod.Harbor_tag([deployEnv: "${deployEnv}",
                                                     projectName:"${projectName}",
                                                     HUB_Url:"${com_values.HUB_Url}"])
+
+                    
 
                     //k8s资源确认
                     public_mod.K8s_exist([Language:"${env.Language}",
