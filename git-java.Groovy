@@ -261,7 +261,7 @@ pipeline{
                                                 ])
 
                                 //ingress
-                                if ( env.svc_exist == serviceName ){
+                                if ( env.ingress_exist != serviceName ){
                                     java.build_ingress([serviceName: "${serviceName}", nameSpaces: "${nameSpaces}",
                                                         domainName: "${domainName}",deployEnv: "${deployEnv}",
                                                          Yml_path: "${Yml_path}",
