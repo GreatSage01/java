@@ -40,7 +40,7 @@ elif [[ "$(echo $deployEnv|grep "uat")" != "" ]]
 then
   domainName="u-${domainName}"
   ws_domainName="u-${ws_domainName}"
-elif [[ "$(echo $deployEnv|grep "pord")" != "" ]]
+elif [[ "$(echo $deployEnv|grep "prod")" != "" ]]
 then
   domainName="${domainName}"
   ws_domainName="${ws_domainName}"
