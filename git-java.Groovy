@@ -128,7 +128,7 @@ pipeline{
                     println '------>WebSocket端口列表:'+ ws_port+'<--------'
                     //docker镜像,IMAGE_Name
                     (IMAGE_Name,tag_reversion)=public_mod.Harbor_tag([deployEnv: "${deployEnv}",
-                                                    Language="${Language}",
+                                                    Language: "${Language}",
                                                     projectName:"${projectName}",
                                                     HUB_Url:"${com_values.HUB_Url}"])
 
