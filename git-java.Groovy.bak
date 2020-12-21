@@ -1,29 +1,30 @@
 //Active Choices
 //https://plugins.jenkins.io/uno-choice/
 //Generate with "pipeline-syntax" > "properties: Set job properties"
-properties([
-    parameters([choice(choices: ['deploy', 'rollback'], description: 'deploy------部署<br>rollback-----回滚', name: 'project_switch'),
-        [$class: 'ChoiceParameter',
-        choiceType: 'PT_MULTI_SELECT',
-        description: '项目',
-        filterLength: 1,
-        filterable: false,
-        name: 'project_name',
-        randomName: 'choice-parameter-734759034940966',
-        script: [$class: 'GroovyScript',
-            fallbackScript: [classpath: [],
-                sandbox: false,
-                script: 'return [\'error\']'],
-            script: [classpath: [],
-                sandbox: false,
-                script: 'return [\'curl\', \'http://172.16.0.94:8888/v1/subversion?url=https://192.168.66.186:8443/svn/Deploy/test/\'].execute().text.readLines()']
-        ]],
-        choice(choices: ['dev', 'prod'], description: '发布环境：<br>dev---------测试环境<br>prod------正式环境', name: 'deployEnv'),
-        choice(choices: ['hub.xueerqin.net/base/oracle-jdk1.8-alpine3.10:0.0.3', 'hub.xueerqin.net/base/oracle-jdk1.8-yushilib-centos7:0.0.6'], description: '选择基础镜像（注：宇视、培训平台请选择centos7镜像、其他默认使用alpine3镜像）', name: 'base_image'),
-        choice(choices: ['api', 'room', 'cloudcourse', 'busi'], description: '子域名', name: 'sub_domain')
-          string(defaultValue: '', description: '接收gitlab webhook触发用户（注：无需填写）', name: 'user_name', trim: true)
-    ])
-])
+//properties([
+//    parameters([choice(choices: ['deploy', 'rollback'], description: 'deploy------部署<br>rollback-----回滚', name: 'project_switch'),
+//        [$class: 'ChoiceParameter',
+//        choiceType: 'PT_MULTI_SELECT',
+//        description: '项目',
+//        filterLength: 1,
+//        filterable: false,
+//        name: 'project_name',
+//        randomName: 'choice-parameter-734759034940966',
+//        script: [$class: 'GroovyScript',
+//            fallbackScript: [classpath: [],
+//                sandbox: false,
+//                script: 'return [\'error\']'],
+//            script: [classpath: [],
+//                sandbox: false,
+//                script: 'return [\'curl\', \'http://172.16.0.94:8888/v1/subversion?url=https://192.168.66.186:8443/svn/Deploy/test/\'].execute().text.readLines()']
+//        ]],
+//        choice(choices: ['dev', 'uat','prod'], description: '发布环境：<br>dev---------测试环境<br>uat-----预发布环境<br>prod------正式环境', name: 'deployEnv'),
+//        choice(choices: ['hub.xueerqin.net/base/oracle-jdk1.8-alpine3.10:0.0.3', 'hub.xueerqin.net/base/oracle-jdk1.8-yushilib-centos7:0.0.6'], description: '选择基础镜像（注：宇视、培训平台请选择centos7镜像、其他默认使用alpine3镜像）', name: 'base_image'),
+//        choice(choices: ['api', 'room', 'cloudcourse', 'busi'], description: '子域名', name: 'sub_domain')
+//          string(defaultValue: '', description: '接收gitlab webhook触发用户（注：无需填写）', name: 'user_name', trim: true)
+//    ])
+//])
+
 
 
 @Library('Jenkins-fuyu@dev')
@@ -180,8 +181,11 @@ pipeline{
     
         stage('构建'){
             when{
-                expression { "${project_switch}" == 'deploy' };
+                allOf{
+                    expression { "${project_switch}" == 'deploy' };
+                    not {expression  { "${env.deployEnv}" == 'prod' }}
 
+                }
             }
             steps{
                 script{
@@ -201,7 +205,11 @@ pipeline{
     
         stage('Docker Image'){
             when{
-                expression { "${project_switch}" == 'deploy' }
+                allOf{
+                    expression { "${project_switch}" == 'deploy' };
+                    not {expression  { "${env.deployEnv}" == 'prod' }}
+
+                }
             }
             steps{
                 script{
@@ -236,16 +244,16 @@ pipeline{
                             submitterParameter: 'APPROVER_name'
                         )
                         //正式线镜像从uat环境获取
-                        //uat_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "uat"])
-                        //println '--->uat docker tag 是：'+uat_tag+'<----------------'
-                        //def uat_Image="${com_values.HUB_Url}/${Language}-uat/${projectName}:${uat_tag}".trim()
+                        uat_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "uat"])
+                        println '--->uat docker tag 是：'+uat_tag+'<----------------'
+                        def uat_Image="${com_values.HUB_Url}/${Language}-uat/${projectName}:${uat_tag}".trim()
                         println '--------->pord环境本次更新的镜像是：'+IMAGE_Name+'<-----------------'
                         //uat镜像推送到prod
-                        //com.DIMG_Chage([HUB_Url:"${com_values.HUB_Url}",
-                        //            HUB_Cred:"${com_values.HUB_Cred}",
-                        //            uat_Image: "${uat_Image}",
-                        //            pord_Image: "${IMAGE_Name}"
-                        //            ])
+                        com.DIMG_Chage([HUB_Url:"${com_values.HUB_Url}",
+                                    HUB_Cred:"${com_values.HUB_Cred}",
+                                    uat_Image: "${uat_Image}",
+                                    pord_Image: "${IMAGE_Name}"
+                                    ])
                     }
                     withKubeConfig(credentialsId: "${K8s_credentials}", serverUrl: "${K8s_url}"){
                         withEnv(["podNum=${proj_values.podNum}"]){
