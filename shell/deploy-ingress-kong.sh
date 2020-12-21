@@ -75,7 +75,7 @@ cat >>${serviceName}-${deployEnv}-ingress-kong.yaml<<EOF
 EOF
 fi
 
-if [[ "${is_plugins}" == "1" ]];then
+if [[ "${cert_manager}" == "1" ]];then
 cat >>${serviceName}-${deployEnv}-ingress-kong.yaml<<EOF
     cert-manager.io/cluster-issuer: letsencrypt-fjfuyu
 EOF
