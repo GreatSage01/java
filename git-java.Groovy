@@ -245,12 +245,8 @@ pipeline{
                         )
                         //正式线镜像从uat环境获取
                         uat_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "uat"])
-                        prod_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "prod"])
                         println '--->uat docker tag 是：'+uat_tag+'<----------------'
-                        println '--->prod docker tag 是：'+prod_tag+'<----------------'
-                        def tag_latest=prod_tag + 1
                         def uat_Image="${com_values.HUB_Url}/${Language}-uat/${projectName}:${uat_tag}".trim()
-                        def IMAGE_Name="${com_values.HUB_Url}/${Language}-prod/${projectName}:${tag_latest}".trim()
                         println '--------->pord环境本次更新的镜像是：'+IMAGE_Name+'<-----------------'
                         //uat镜像推送到prod
                         com.DIMG_Chage([HUB_Url:"${com_values.HUB_Url}",
