@@ -181,7 +181,8 @@ pipeline{
     
         stage('构建'){
             when{
-                expression { "${project_switch}" == 'deploy' }
+                expression { "${project_switch}" == 'deploy' };
+                not {expression  { "${deployEnv}" == 'pord' }
             }
             steps{
                 script{
@@ -203,7 +204,8 @@ pipeline{
             when{
                 allOf{
                     environment name: 'project_switch',value: 'deploy';
-                    not { environment name: 'deployEnv',value: 'pord'  }
+                    not {expression  { "${deployEnv}" == 'pord' }
+
                 }
             }
             steps{
