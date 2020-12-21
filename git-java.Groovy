@@ -244,7 +244,7 @@ pipeline{
                             submitterParameter: 'APPROVER_name'
                         )
                         //正式线镜像从uat环境获取
-                        public_mod.Env_image([serviceName: "${serviceName}",Language: "${Language}"])
+                        public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}"])
                         int tag_latest=Integer.parseInt(prod_tag)
                         def uat_Image="${com_values.HUB_Url}/${Language}-uat/${projectName}:${uat_tag}".trim()
                         def IMAGE_Name="${com_values.HUB_Url}/${Language}-prod/${projectName}:${tag_latest}".trim()
