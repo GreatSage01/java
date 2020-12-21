@@ -245,8 +245,18 @@ pipeline{
                         )
                         //正式线镜像从uat环境获取
                         def uat_tag=sh(script: "curl http://172.16.0.94:9991/v1/harbor_tag?repo_name=${Language}-uat/${projectName}", returnStdout: true)
-                        env.IMAGE_Name="${com_values.HUB_Url}/${Language}-${deployEnv}/${projectName}:${uat_tag}".trim()
+                        def prod_tag=sh(script: "curl http://172.16.0.94:9991/v1/harbor_tag?repo_name=${Language}-pord/${projectName}", returnStdout: true)
+                        int last_prod_tag=Integer.parseInt(prod_tag)
+                        def prod_tag= last_prod_tag + 1
+                        def uat_Image="${com_values.HUB_Url}/${Language}-uat/${projectName}:${uat_tag}".trim()
+                        def IMAGE_Name="${com_values.HUB_Url}/${Language}-prod/${projectName}:${prod_tag}".trim()
                         println '--------->pord环境本次更新的镜像是：'+IMAGE_Name+'<-----------------'
+                        //uat镜像推送到prod
+                        com.DIMG_Chage([HUB_Url:"${com_values.HUB_Url}",
+                                    HUB_Cred:"${com_values.HUB_Cred}",
+                                    uat_Image: "${uat_Image}",
+                                    pord_Image: "${IMAGE_Name}"
+                                    ])
                     }
                     withKubeConfig(credentialsId: "${K8s_credentials}", serverUrl: "${K8s_url}"){
                         withEnv(["podNum=${proj_values.podNum}"]){
