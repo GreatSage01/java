@@ -290,16 +290,35 @@ pipeline{
     
     
 
-        stage('echo') {
+        stage('清理') {
             steps {
-                echo com_values.Prod_k8sUrl
-                println  com_values.SVN_Url
-                println proj_values.Approver
-                println "projectName"+projectName
-                println "k8s_url:"+K8s_url
-                println "k8s_credentials:"+K8s_credentials
-                println "Tag_reversion:" + Tag_reversion
+                println '清理'
             }
-        }   
+        }
+
+        stage("回滚"){
+           when{
+               allOf{
+                   expression { "${project_switch}" == "rollback" }
+               }
+            }
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    script {
+                        com.Roll_back([deployEnv: "${deployEnv}",
+                                        nameSpaces: "${nameSpaces}",
+                                        serviceName: "${serviceName}",
+                                        Approver: "${proj_values.Approver}",
+                                        HUB_Url: "${com_values.HUB_Url}",
+                                        HUB_Cred: "${com_values.HUB_Cred}",
+                                        k8s_credentials: "${K8s_credentials}",
+                                        k8s_url: "${K8s_url}",
+                                        svc_exist: "${svc_exist}"
+                                    ])
+                        
+                    }
+                }
+            }
+        }
     }
 }
