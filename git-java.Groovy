@@ -248,8 +248,7 @@ pipeline{
                         prod_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "prod"])
                         println '--->uat docker tag 是：'+uat_tag+'<----------------'
                         println '--->prod docker tag 是：'+prod_tag+'<----------------'
-                        int  temp_tag=Integer.parseInt(prod_tag)
-                        def tag_latest=temp_tag + 1
+                        def tag_latest=prod_tag + 1
                         def uat_Image="${com_values.HUB_Url}/${Language}-uat/${projectName}:${uat_tag}".trim()
                         def IMAGE_Name="${com_values.HUB_Url}/${Language}-prod/${projectName}:${tag_latest}".trim()
                         println '--------->pord环境本次更新的镜像是：'+IMAGE_Name+'<-----------------'
