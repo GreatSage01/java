@@ -244,8 +244,8 @@ pipeline{
                             submitterParameter: 'APPROVER_name'
                         )
                         //正式线镜像从uat环境获取
-                        uat_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "${deployEnv}"])
-                        prod_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "${deployEnv}"])
+                        uat_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "uat"])
+                        prod_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "prod"])
                         println '--->uat docker tag 是：'+uat_tag+'<----------------'
                         println '--->prod docker tag 是：'+prod_tag+'<----------------'
                         int  temp_tag=Integer.parseInt(prod_tag)
