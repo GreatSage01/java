@@ -58,6 +58,7 @@ SSL_secretName=${result//./-}
 echo "Ingress 域名是：$domainName"
 echo "Ingress SSL证书泛域名： ${SSL_secret}"
 
+mkdir -p ${Yml_path}
 cd ${Yml_path}
 
 cat >${serviceName}-${deployEnv}-ingress-kong.yaml<<EOF
