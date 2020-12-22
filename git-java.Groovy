@@ -124,6 +124,7 @@ pipeline{
                     
                     println '------>WebSocket端口列表:'+ ws_port+'<--------'
 
+                    def base_im=""
                     //定义基础镜像
                     if (choise_image == 'apline' ){
                         env.base_im="base/oracle-jdk1.8-alpine3.10"
