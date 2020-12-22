@@ -124,9 +124,10 @@ pipeline{
                     
                     println '------>WebSocket端口列表:'+ ws_port+'<--------'
                     //定义基础镜像
+                    def base_im
                     if ( env.choise_image == 'alpine3' ){
                         println 'alpine3'
-                        def base_im='base/oracle-jdk1.8-alpine3.10'
+                        base_im='base/oracle-jdk1.8-alpine3.10'
                     }else if ( choise_image == 'centos7' ){
                         println 'centos7'
                         def base_im='base/oracle-jdk1.8-yushilib-centos7'
