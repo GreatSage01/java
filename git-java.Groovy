@@ -131,6 +131,8 @@ pipeline{
                         println 'centos7'
                         def base_im='base/oracle-jdk1.8-yushilib-centos7'
                     }
+                    println "test"
+                    println 'base_im'+base_im
                     withEnv(["base_im=${base_im}"]){
                         def base_tag=sh(script: "curl http://172.16.0.94:9999/v1/harbor_tag?repo_name=${base_im}", returnStdout: true)
                         env.image_base=com_values.HUB_Url+'/'+base_im+':'+base_tag
