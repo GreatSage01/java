@@ -128,13 +128,15 @@ pipeline{
                     //定义基础镜像
                     if ( choise_image == 'alpine3' ){
                         println 'alpine3'
-                        env.base_im="base/oracle-jdk1.8-alpine3.10"
+                        def base_im="base/oracle-jdk1.8-alpine3.10"
                     }else if ( choise_image == 'centos7' ){
                         println 'centos7'
-                        env.base_im='base/oracle-jdk1.8-yushilib-centos7'
+                        def base_im='base/oracle-jdk1.8-yushilib-centos7'
                     }
-                    def base_tag=sh(script: "curl http://172.16.0.94:9999/v1/harbor_tag?repo_name=${base_im}", returnStdout: true)
-                    env.image_base=com_values.HUB_Url+'/'+base_im+':'+base_tag
+                    withEnv(["base_im=${base_im}"]){
+                        def base_tag=sh(script: "curl http://172.16.0.94:9999/v1/harbor_tag?repo_name=${base_im}", returnStdout: true)
+                        env.image_base=com_values.HUB_Url+'/'+base_im+':'+base_tag
+                    }
                     println '----------->image_base:'+image_base+'<----------------'
 
                     //docker镜像,IMAGE_Name
