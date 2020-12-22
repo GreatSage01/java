@@ -54,8 +54,10 @@ pipeline{
         k8s_ENV="huaweiyun"
 
         domainName="${sub_domain}.xueerqin.net"
-
+        //临时
         deployEnv="${project_branch}"
+
+        nameSpaces="${project_branch}"
     }
 
 
