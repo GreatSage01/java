@@ -123,8 +123,6 @@ pipeline{
                     java.build_values("${env.WORKSPACE}/${project_name}/deploy-config/${deployEnv}-values.yaml")
                     
                     println '------>WebSocket端口列表:'+ ws_port+'<--------'
-
-                    def base_im=""
                     //定义基础镜像
                     if ( choise_image == 'alpine3' ){
                         println 'alpine3'
