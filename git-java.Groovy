@@ -4,7 +4,7 @@
 properties([
     parameters([choice(choices: ['deploy', 'rollback'], description: 'deploy------部署<br>rollback-----回滚', name: 'project_switch'),
         [$class: 'ChoiceParameter',
-        choiceType: 'PT_MULTI_SELECT',
+        choiceType: 'PT_SINGLE_SELECT',
         description: '项目',
         filterLength: 1,
         filterable: false,
@@ -16,12 +16,12 @@ properties([
                 script: 'return [\'error\']'],
             script: [classpath: [],
                 sandbox: false,
-                script: 'return [\'curl\', \'http://172.16.0.94:8888/v1/subversion?url=https://192.168.66.186:8443/svn/Deploy/test/\'].execute().text.readLines()']
+                script: 'return [\'curl\', \'http://172.16.0.94:9991/v1/gitlab?token=9jAzgpnqiXgxqbKu1KF2&groupname=java\'].execute().text.readLines()']
         ]],
-        choice(choices: ['dev', 'prod'], description: '发布环境：<br>dev---------测试环境<br>prod------正式环境', name: 'deployEnv'),
-        choice(choices: ['hub.xueerqin.net/base/oracle-jdk1.8-alpine3.10:0.0.3', 'hub.xueerqin.net/base/oracle-jdk1.8-yushilib-centos7:0.0.6'], description: '选择基础镜像（注：宇视、培训平台请选择centos7镜像、其他默认使用alpine3镜像）', name: 'base_image'),
+        choice(choices: ['dev', 'master'], description: '发布环境：<br>dev---------测试环境<br>master------正式环境', name: 'project_branch'),
+        choice(choices: ['alpine3', 'centos7'], description: '选择基础镜像（注：宇视、培训平台请选择centos7镜像、其他默认使用alpine3镜像）', name: 'choise_image'),
         choice(choices: ['api', 'room', 'cloudcourse', 'busi'], description: '子域名', name: 'sub_domain')
-          string(defaultValue: '', description: '接收gitlab webhook触发用户（注：无需填写）', name: 'user_name', trim: true)
+        string(defaultValue: '', description: '接收gitlab webhook触发用户（注：无需填写）', name: 'user_name', trim: true)
     ])
 ])
 
@@ -53,7 +53,9 @@ pipeline{
         //k8s集群部署地方
         k8s_ENV="huaweiyun"
 
-        domainName="api.xueerqin.net"
+        domainName="${sub_domain}.xueerqin.net"
+
+        deployEnv=${project_branch}
     }
 
 
@@ -80,13 +82,13 @@ pipeline{
                     }
 
                     //根据环境确认git分支
-                    git_Bran=git.get_gitBranch("${deployEnv}")
-                    println  '--------》git pull 分支是：'+git_Bran+'<--------------'
+                    //git_Bran=git.get_gitBranch("${deployEnv}")
+                    //println  '--------》git pull 分支是：'+git_Bran+'<--------------'
 
                     // 检出GIT上的源代码
                     def git_Url=com_values.Gitlab_Url+'/'+project_name+'.git'
                     git.gitcheckout([project_name:"${project_name}",
-                               Gitlab_Branch: "${git_Bran}",
+                               Gitlab_Branch: "${project_branch}",
                                Gitlab_Cred:"${com_values.Gitlab_Cred}",
                                Gitlab_Url:"${git_Url}"])
 
@@ -98,12 +100,6 @@ pipeline{
         stage("初始化"){
             steps{
                 script{
-                    //定义基础镜像
-                    def image_base=com_values.HUB_Url+'/base/oracle-jdk1.8-alpine3.10:0.0.4'
-                    env.image_base="${image_base}"
-                    println "image_base:"+image_base
-                    
-
                     // 镜像标签转小写
                     env.projectName="${project_name}".toLowerCase()
                     
@@ -115,7 +111,7 @@ pipeline{
                                                         Dev_k8sCred: "${com_values.Prod_k8sCred}"
                                                         ])
                     //根据发布环境确认k8s部署命名空间
-                    nameSpaces=com.get_NS([deployEnv: "${deployEnv}",Language:"${Language}"])
+                    //nameSpaces=com.get_NS([deployEnv: "${deployEnv}",Language:"${Language}"])
                     println "-------->发布环境："+deployEnv+', k8s部署空间:'+nameSpaces+' <------------'
 
                     //项目yaml文件保存路径
@@ -125,6 +121,17 @@ pipeline{
                     java.build_values("${env.WORKSPACE}/${project_name}/deploy-config/${deployEnv}-values.yaml")
                     
                     println '------>WebSocket端口列表:'+ ws_port+'<--------'
+
+                    //定义基础镜像
+                    if (choise_image == 'apline' ){
+                        env.base_im="base/oracle-jdk1.8-alpine3.10"
+                    }else if ( choise_image == 'centos7'){
+                        env.base_im='base/oracle-jdk1.8-yushilib-centos7'
+                    }
+                    def base_tag=sh(script: "curl http://172.16.0.94:9999/v1/harbor_tag?repo_name=${base_im}", returnStdout: true)
+                    env.image_base=com_values.HUB_Url+"/${base_im}:"+base_tag
+                    println '----------->image_base:'+image_base+'<----------------'
+
                     //docker镜像,IMAGE_Name
                     (IMAGE_Name,tag_reversion)=public_mod.Harbor_tag([deployEnv: "${deployEnv}",
                                                     Language: "${Language}",

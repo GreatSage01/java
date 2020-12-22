@@ -5,3 +5,4 @@ serviceName: tcp-server
 #项目第一级目录，例如：busi.xueerqin.net/bdc/,就是/bdc/，默认为/bdc/
 urlPath: /tcp-server/
 #k8s上pod健康检查目录路径。例：/health 或者 /bdc/health
+
