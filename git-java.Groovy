@@ -130,7 +130,7 @@ pipeline{
                         base_im='base/oracle-jdk1.8-alpine3.10'
                     }else if ( choise_image == 'centos7' ){
                         println 'centos7'
-                        def base_im='base/oracle-jdk1.8-yushilib-centos7'
+                        base_im='base/oracle-jdk1.8-yushilib-centos7'
                     }
                     println "test"
                     println 'base_im'+base_im
