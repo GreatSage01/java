@@ -20,7 +20,7 @@ properties([
         ]],
         choice(choices: ['dev', 'master'], description: '发布环境：<br>dev---------测试环境<br>master------正式环境', name: 'project_branch'),
         choice(choices: ['alpine3', 'centos7'], description: '选择基础镜像（注：宇视、培训平台请选择centos7镜像、其他默认使用alpine3镜像）', name: 'choise_image'),
-        choice(choices: ['api', 'room', 'cloudcourse', 'busi'], description: '子域名', name: 'sub_domain')
+        choice(choices: ['api', 'room', 'cloudcourse', 'busi'], description: '子域名', name: 'sub_domain'),
         string(defaultValue: '', description: '接收gitlab webhook触发用户（注：无需填写）', name: 'user_name', trim: true)
     ])
 ])
