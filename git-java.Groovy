@@ -308,9 +308,19 @@ pipeline{
     
     
 
-        stage('清理') {
-            steps {
-                println '清理'
+        //清理环境
+        stage('清理'){
+            when{
+                expression { "${project_switch}" == 'deploy' }
+            }
+            steps{
+                script{
+                    withEnv(["IMAGE_Name=${IMAGE_Name}"]){
+                        sh '''/bin/bash
+                            docker rmi -f ${IMAGE_Name}
+                        '''
+                    }
+                }
             }
         }
 
