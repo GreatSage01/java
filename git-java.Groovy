@@ -126,7 +126,7 @@ pipeline{
 
                     def base_im=""
                     //定义基础镜像
-                    if (choise_image == 'apline' ){
+                    if (choise_image == 'alpine3' ){
                         env.base_im="base/oracle-jdk1.8-alpine3.10"
                     }else if ( choise_image == 'centos7' ){
                         env.base_im='base/oracle-jdk1.8-yushilib-centos7'
