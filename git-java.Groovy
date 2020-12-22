@@ -4,7 +4,7 @@
 properties([
     parameters([choice(choices: ['deploy', 'rollback'], description: 'deploy------部署<br>rollback-----回滚', name: 'project_switch'),
         [$class: 'ChoiceParameter',
-        choiceType: 'PT_SINGLE_SELECT',
+        choiceType: 'PT_MULTI_SELECT',
         description: '项目',
         filterLength: 1,
         filterable: false,
