@@ -4,7 +4,7 @@
 #deployEnv 发布的环境dev、uat、prod
 #domainName 完整的域名
 #Yml_path yaml文件保存路径
-#is_plugins是否鉴权，0为假不需要，1为真需要，目前只有app-auth这个鉴权插件
+#is_plugins是否鉴权，0为不需要，1为需要，目前只有app-auth这个鉴权插件
 #WebSocket 端口，shell列表形式：(123,1245,111)
 
 set -x
@@ -36,21 +36,21 @@ if [[ "$(echo $deployEnv|grep "dev")" != "" ]]
 then
   domainName="t-${domainName}"
   ws_domainName="t-${ws_domainName}"
-elif [[ "$(echo $deployEnv|grep "uat")" != "" ]]
+elif [[ "$(echo $deployEnv|grep "pre")" != "" ]]
 then
-  domainName="u-${domainName}"
-  ws_domainName="u-${ws_domainName}"
+  domainName="s-${domainName}"
+  ws_domainName="s-${ws_domainName}"
 elif [[ "$(echo $deployEnv|grep "prod")" != "" ]]
 then
   domainName="${domainName}"
   ws_domainName="${ws_domainName}"
 
 else
-  echo "命名空间错误：${nameSpaces} "
+  echo "命名空间错误：${nameSpaces},请检查！ "
   exit 1
 fi
 
-#ssl证书泛域名
+#ssl证书泛域名，默认是https
 result=${domainName#*.}
 SSL_secret="*."${result}
 SSL_secretName=${result//./-}
@@ -100,7 +100,7 @@ spec:
           servicePort: 80
 EOF
 
-if [ ${ws_port} != 0 ]
+if [[ ${ws_port} != 0 ]]
 then
   j=0
   for i in ${ws_port[@]}
@@ -114,6 +114,7 @@ then
           servicePort: ${i}
         path: /${serviceName}/
 EOF
+    j+=1
   done 
 fi 
 

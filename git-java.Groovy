@@ -216,14 +216,15 @@ pipeline{
             }
             steps{
                 script{
-                    //if( env.deployEnv == 'master' || env.deployEnv == 'feiteng-master' ){
-                    //    timeout(time: 30, unit: 'MINUTES') {
-                    //        input message:'deploy to master?', submitter: "${proj_values.Approver}"
-                    //        echo "master docker image build"
-                    //    }
-                    //}else if( env.deployEnv == 'dev' || env.deployEnv == 'feiteng-dev' ){
-                    //        echo "dev docker image build"
-                    //}
+                    if( deployEnv == prod ){
+                        timeout(time: 30, unit: 'MINUTES') {
+                            input message:'是否发布到生产?', submitter: "${proj_values.Approver}",
+                            ok: '确定',submitterParameter: 'APPROVER_name'
+                            println "-------------->prod docker image build<-------------------"
+                        }
+                    }else if( deployEnv == 'dev' || deployEnv == 'pre' ){
+                        println "------------>dev or pre docker image build<------------------"
+                    }
                     dir(path: "${env.WORKSPACE}/${project_name}" ){
                         java.BuildImage([IMAGE_Name:"${IMAGE_Name}",
                                     HUB_Url:"${com_values.HUB_Url}",
@@ -239,25 +240,17 @@ pipeline{
             }
             steps{
                 script{
-                    if( env.deployEnv == 'prod' ){
-                        //正式线发布确认
-                        input(message:'是否发布到prod环境?',
-                            ok: '确定',
-                            submitter: "${proj_values.Approver}",
-                            submitterParameter: 'APPROVER_name'
-                        )
                         //正式线镜像从uat环境获取
                         //uat_tag=public_mod.Env_image([projectName: "${serviceName}",Language: "${Language}",deployEnv: "uat"])
                         //println '--->uat docker tag 是：'+uat_tag+'<----------------'
                         //def uat_Image="${com_values.HUB_Url}/${Language}-uat/${projectName}:${uat_tag}".trim()
-                        println '--------->pord环境本次更新的镜像是：'+IMAGE_Name+'<-----------------'
+                        //println '--------->pord环境本次更新的镜像是：'+IMAGE_Name+'<-----------------'
                         //uat镜像推送到prod
                         //com.DIMG_Chage([HUB_Url:"${com_values.HUB_Url}",
                         //            HUB_Cred:"${com_values.HUB_Cred}",
                         //            uat_Image: "${uat_Image}",
                         //            pord_Image: "${IMAGE_Name}"
                         //            ])
-                    }
                     withKubeConfig(credentialsId: "${K8s_credentials}", serverUrl: "${K8s_url}"){
                         withEnv(["podNum=${proj_values.podNum}"]){
                             dir(path: "${env.WORKSPACE}/${project_name}"){
@@ -271,7 +264,7 @@ pipeline{
                                 //deployment
                                 java.build_deploy([svc_exist: "${svc_exist}", serviceName: "${serviceName}",
                                                     deployEnv: "${deployEnv}", IMAGE_Name: "${IMAGE_Name}",
-                                                    nameSpaces: "${nameSpaces}", podNum: "${podNum}",
+                                                    nameSpaces: "${nameSpaces}", podNum: "${podNum}",healthCheck: "${healthCheck}",
                                                     Yml_path: "${Yml_path}", ws_port: "${ws_port}"
                                                 ])
 
@@ -279,7 +272,7 @@ pipeline{
                                 if ( env.ingress_exist != "${serviceName}-tls" ){
                                     java.build_ingress([serviceName: "${serviceName}", nameSpaces: "${nameSpaces}",
                                                         domainName: "${domainName}",deployEnv: "${deployEnv}",
-                                                         Yml_path: "${Yml_path}",
+                                                        Yml_path: "${Yml_path}",
                                                         is_plugins: "${is_plugins}", ws_port: "${ws_port}"
                                                     ])
 
@@ -298,7 +291,7 @@ pipeline{
                         }
                     }
 
-                    println  deployEnv+"."+projectName+"部署到k8s成功！"
+                    println  '--------->'+deployEnv+"."+projectName+"部署到k8s成功！<-----------"
     
                 }
             }

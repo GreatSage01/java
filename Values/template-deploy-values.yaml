@@ -5,4 +5,12 @@ serviceName: tcp-server
 #项目第一级目录，例如：busi.xueerqin.net/bdc/,就是/bdc/，默认为/bdc/
 urlPath: /tcp-server/
 #k8s上pod健康检查目录路径。例：/health 或者 /bdc/health
-
+healthCheck: /tcp-server/health
+#k8s pod 部署数量
+podNum: '1'
+#使用的基础镜像，宇视、培训平台请选择centos7镜像、其他默认使用alpine3镜像
+choise_image: centos7   #choise_image: alpine3
+#WebSocket端口列表：111，2222，333
+ws_port: 111,2222,3333
+#是否启用鉴权插件 ,目前只有app-auth这个鉴权插件 ，pod 名是lm-auth-center,默认是0 使用
+is_plugins: 1

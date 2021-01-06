@@ -1,4 +1,12 @@
 #!/bin/bash -e
+#serviceName 小写项目名
+#podNum pod容器副本数
+#nameSpaces 命名空间
+#Yml_path yaml文件保存路径
+#deployEnv 部署环境: dev,pre,prod
+#IMAGE_Name 部署镜像
+#WebSocket 端口，shell列表形式：(123,1245,111)
+#healthCheck 监控健康检查地址 /school/health
 
 serviceName=$1
 podNum=$2
@@ -7,13 +15,19 @@ Yml_path=$4
 deployEnv=$5
 IMAGE_Name=$6
 ws_port=$7
+healthCheck=$8
 
 
-if [ ! $# == 7 ]; then
-  echo "Usage: $0 serviceName podNum nameSpaces Yml_path deployEnv IMAGE_Name ws_port"
+if [ ! $# == 8 ]; then
+  echo "Usage: $0 serviceName podNum nameSpaces Yml_path deployEnv IMAGE_Name ws_port healthCheck"
   exit
 fi
 
+if [[ ${deployEnv} != 'prod'  ]];then
+  env='dev'
+else
+  env='master'
+fi
 
 mkdir -p ${Yml_path}
 
@@ -50,7 +64,7 @@ spec:
               - key: environment
                 operator: In
                 values:
-                - ${deployEnv}
+                - ${env}
       imagePullSecrets:
       - name: hubsecret
       volumes:
@@ -92,7 +106,7 @@ spec:
           protocol: TCP
         readinessProbe:
           httpGet:
-            path: /${serviceName}/health
+            path: ${healthCheck}
             port: 80
             scheme: HTTP
           initialDelaySeconds: 30
@@ -100,7 +114,7 @@ spec:
           timeoutSeconds: 5
         livenessProbe:
           httpGet:
-            path: /${serviceName}/health
+            path: ${healthCheck}
             port: 80
             scheme: HTTP
           initialDelaySeconds: 30
@@ -121,6 +135,7 @@ spec:
     targetPort: 80
     name: web
 EOF
+
 if [[ ${ws_port} != 0 ]]
 then
   j=0
