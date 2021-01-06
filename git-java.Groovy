@@ -262,6 +262,7 @@ pipeline{
                                                 ])
 
                                 //deployment
+                                println healthCheck
                                 java.build_deploy([svc_exist: "${svc_exist}", serviceName: "${serviceName}",
                                                     deployEnv: "${deployEnv}", IMAGE_Name: "${IMAGE_Name}",
                                                     nameSpaces: "${nameSpaces}", podNum: "${podNum}",healthCheck: "${healthCheck}",
