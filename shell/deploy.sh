@@ -68,9 +68,6 @@ spec:
       imagePullSecrets:
       - name: hubsecret
       volumes:
-      - name: ${serviceName}-config
-        configMap:
-          name: ${serviceName}-config
       - name: skw-agent-volume
         emptyDir: {}
       initContainers:
@@ -95,9 +92,6 @@ spec:
             cpu: 50m
             memory: 50Mi
         volumeMounts:
-        - name: ${serviceName}-config
-          mountPath: /opt/config
-          readOnly: true
         - name: skw-agent-volume
           mountPath: /opt/agent
         ports:
