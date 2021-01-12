@@ -216,7 +216,7 @@ pipeline{
             }
             steps{
                 script{
-                    if( deployEnv == "rod" ){
+                    if( deployEnv == "prod" ){
                         timeout(time: 30, unit: 'MINUTES') {
                             input message:'是否发布到生产?', submitter: "${proj_values.Approver}",
                             ok: '确定',submitterParameter: 'APPROVER_name'
