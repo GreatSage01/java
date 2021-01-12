@@ -135,15 +135,16 @@ then
   j=0
   for i in ${ws_port[@]}
   do 
-    echo >>${serviceName}-${deployEnv}.yaml <<EOF
+    cat >>${serviceName}-${deployEnv}.yaml <<EOF
   - port: ${i}
     targetPort: ${i}
     name: ws-${j}
 EOF
     j+=1
   done
-fi 
-echo >>${serviceName}-${deployEnv}.yaml <<EOF
+fi
+
+cat >>${serviceName}-${deployEnv}.yaml <<EOF
   selector:
     app: ${serviceName}
 EOF
