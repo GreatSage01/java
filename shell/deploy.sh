@@ -87,7 +87,7 @@ EOF
 if [[ ${deployEnv} == 'pre' ]];then
 cat >>${serviceName}-${deployEnv}.yaml<<EOF
           - name: JAVA_TOOL_OPTIONS
-            value: -Xms512m -Xmx800m
+            value: -Xms512m -Xmx512m
 EOF
 fi
 
