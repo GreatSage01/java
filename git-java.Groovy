@@ -231,7 +231,6 @@ pipeline{
                                     HUB_Cred:"${com_values.HUB_Cred}"])
                     }
 
-                    //指定子模块分支
                     
                 }
             }

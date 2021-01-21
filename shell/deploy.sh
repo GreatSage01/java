@@ -89,6 +89,7 @@ cat >>${serviceName}-${deployEnv}.yaml<<EOF
           - name: JAVA_TOOL_OPTIONS
             value: -Xms512m -Xmx800m
 EOF
+fi
 
 cat >>${serviceName}-${deployEnv}.yaml<<EOF
           - name: TZ
