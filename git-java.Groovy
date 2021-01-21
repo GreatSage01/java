@@ -230,6 +230,9 @@ pipeline{
                                     HUB_Url:"${com_values.HUB_Url}",
                                     HUB_Cred:"${com_values.HUB_Cred}"])
                     }
+
+                    //指定子模块分支
+                    
                 }
             }
         }

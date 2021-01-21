@@ -82,6 +82,15 @@ spec:
         image: ${IMAGE_Name}
         imagePullPolicy: Always
         env:
+EOF
+
+if [[ ${deployEnv} == 'pre' ]];then
+cat >>${serviceName}-${deployEnv}.yaml<<EOF
+          - name: JAVA_TOOL_OPTIONS
+            value: -Xms512m -Xmx800m
+EOF
+
+cat >>${serviceName}-${deployEnv}.yaml<<EOF
           - name: TZ
             value: Asia/Shanghai
         resources:
