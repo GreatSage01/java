@@ -73,7 +73,7 @@ spec:
       initContainers:
         - name: skywalking-agent
           #image: hub.xueerqin.net/base/skywalking-agent:7.0.0
-          image: hub.xueerqin.net/base/skywalking-agent:8.3.0
+          image: hub.xueerqin.net/base/skywalking-agent:7.0.1
           command: ['cp','-rf','/skywalking/agent/','/tmp/']
           volumeMounts:
             - mountPath: /tmp
