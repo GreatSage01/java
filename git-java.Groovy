@@ -53,7 +53,7 @@ pipeline{
         k8s_ENV="huaweiyun"
 
         //默认域名
-        domainName="api.xueerqin.net"
+        //domainName="api.xueerqin.net"
 
     }
 
@@ -118,7 +118,7 @@ pipeline{
                     //java部署参数
                     java.build_values("${env.WORKSPACE}/${project_name}/deploy-config/values.yaml")
 
-                    println "-------->发布环境："+deployEnv+', k8s部署空间:'+nameSpaces+' <------------'                    
+                    println "-------->发布环境："+deployEnv+', k8s部署空间:'+nameSpaces+' <------------'  
                     println '------>WebSocket端口列表:'+ ws_port+'<--------'
 
                     //定义基础镜像
@@ -135,7 +135,6 @@ pipeline{
                         env.image_base=com_values.HUB_Url+'/'+base_im+':'+base_tag
                     }
                     println '----------->本次 image_base 是:'+image_base+'<----------------'
-
                     //docker镜像,IMAGE_Name
                     (IMAGE_Name,tag_reversion)=public_mod.Harbor_tag([nameSpaces: "${nameSpaces}",
                                                     Language: "${Language}",
